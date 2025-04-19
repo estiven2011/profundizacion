@@ -1,0 +1,62 @@
+﻿@page "/login"
+@using gestionReservas.Components
+@inject gestionReservas.Services.UserService UserService
+@inject gestionReservas.Services.AuthService AuthService
+@inject NavigationManager Navigation
+
+<NavMenu />
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow rounded">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Iniciar Sesión</h3>
+
+                    @if (!string.IsNullOrEmpty(Error))
+                    {
+                        <div class="alert alert-danger">@Error</div>
+                    }
+
+                    <div class="mb-3">
+                        <label for="documento" class="form-label">Documento</label>
+                        <input type="text" class="form-control" id="documento" @bind="Documento" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" @bind="Password" />
+                    </div>
+
+                    <button class="btn btn-primary w-100" @onclick="IniciarSesion">Ingresar</button>
+
+                    <div class="text-center mt-3">
+                        <a href="/register">¿No tienes cuenta? Regístrate</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Documento = string.Empty;
+    private string Password = string.Empty;
+    private string Error = string.Empty;
+
+    private async Task IniciarSesion()
+    {
+        if (await UserService.ValidarUsuarioAsync(Documento, Password))
+        {
+            var nombre = await UserService.ObtenerNombreAsync(Documento);
+            AuthService.IniciarSesion(Documento, nombre ?? "Usuario");
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            Error = "Documento o contraseña incorrectos.";
+        }
+    }
+}
+
+

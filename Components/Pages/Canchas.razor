@@ -1,0 +1,54 @@
+﻿@page "/canchas"
+@inject NavigationManager Navigation
+
+<NavMenu />
+
+<header class="canchas-header">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Nuestras Canchas</h1>
+        <p class="lead">Explora las canchas disponibles y reserva la tuya</p>
+    </div>
+</header>
+
+<main class="container mt-4">
+    <section class="canchas-list-section">
+        <div class="row">
+            @foreach (var cancha in canchas)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <img src="@cancha.Imagen" class="card-img-top" alt="@cancha.Nombre">
+                        <div class="card-body">
+                            <h5 class="card-title">@cancha.Nombre</h5>
+                            <p class="card-text">@cancha.Descripcion</p>
+                            <button class="btn btn-primary" @onclick="() => ReservarCancha(cancha.Nombre)">Reservar</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</main>
+
+@code {
+    private List<Cancha> canchas = new()
+    {
+        new Cancha { Nombre = "Cancha de Fútbol 7", Descripcion = "Amplia y con césped sintético.", Imagen = "img/cancha7.jpg" },
+        new Cancha { Nombre = "Cancha de MicroFutbol", Descripcion = "Superficie dura y en excelente estado.", Imagen = "img/canchaMicro.jpg" },
+        new Cancha { Nombre = "Cancha de Futbol 11", Descripcion = "Ideal para jugar con amigos.", Imagen = "img/cancha11.jpg" }
+    };
+
+    private void ReservarCancha(string nombreCancha)
+    {
+        Console.WriteLine($"Reserva iniciada para {nombreCancha}");
+        Navigation.NavigateTo("/reservas");
+    }
+
+
+    private class Cancha
+    {
+        public string Nombre { get; set; }
+        public string Descripcion { get; set; }
+        public string Imagen { get; set; }
+    }
+}

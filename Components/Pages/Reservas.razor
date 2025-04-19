@@ -1,0 +1,148 @@
+﻿@page "/reservas"
+
+<NavMenu />
+
+<header class="reservas-header">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Reservas de Canchas</h1>
+        <p class="lead">Consulta disponibilidad y reserva tu cancha.</p>
+    </div>
+</header>
+
+<main class="container mt-4 mb-4">
+    <section class="reservation-form-section">
+        <h2 class="fw-bold text-center">Agregar Nueva Reserva</h2>
+        <EditForm Model="nuevaReserva" OnValidSubmit="AgregarReserva">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <InputDate id="fecha" class="form-control" @bind-Value="nuevaReserva.Fecha" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="mb-3">
+                <label for="cancha" class="form-label">Tipo de Cancha</label>
+                <InputSelect id="cancha" class="form-control" @bind-Value="nuevaReserva.Cancha">
+                    @foreach (var tipo in tiposDeCancha)
+                    {
+                        <option value="@tipo">@tipo</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-3">
+                <label for="horaInicio" class="form-label">Hora de Inicio</label>
+                <InputSelect id="horaInicio" class="form-control" @bind-Value="horaInicio">
+                    @foreach (var hora in horasDisponibles)
+                    {
+                        <option value="@hora">@hora</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-3">
+                <label for="horaFin" class="form-label">Hora de Finalización</label>
+                <InputSelect id="horaFin" class="form-control" @bind-Value="horaFin">
+                    @foreach (var hora in horasDisponibles)
+                    {
+                        <option value="@hora">@hora</option>
+                    }
+                </InputSelect>
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar Reserva</button>
+        </EditForm>
+    </section>
+
+    <section class="reservation-list-section mt-5">
+        <h2 class="fw-bold text-center">Reservas Disponibles</h2>
+        <ul class="list-group mt-3">
+            @foreach (var reserva in reservas)
+            {
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold">@reserva.Fecha.ToString("yyyy-MM-dd")</h5>
+                            <p>@reserva.Cancha - @reserva.Horario</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-warning me-2" @onclick="() => EditarReserva(reserva)">Editar</button>
+                            <button class="btn btn-danger" @onclick="() => EliminarReserva(reserva)">Eliminar</button>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+</main>
+
+@code {
+    private List<Reserva> reservas = new()
+    {
+        new Reserva { Fecha = new DateTime(2024, 3, 5), Cancha = "Cancha de Fútbol", Horario = "10:00 - 11:00" },
+        new Reserva { Fecha = new DateTime(2024, 3, 6), Cancha = "Cancha de Padel", Horario = "18:00 - 19:00" },
+        new Reserva { Fecha = new DateTime(2024, 3, 7), Cancha = "Cancha de Tenis", Horario = "08:00 - 09:00" }
+    };
+
+    private Reserva nuevaReserva = new Reserva();
+    private string horaInicio;
+    private string horaFin;
+
+    private List<string> horasDisponibles = new List<string>();
+    private List<string> tiposDeCancha = new List<string> { "Cancha de Fútbol 7", "Cancha de Fútbol 11", "Cancha de MicroFutbol" };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        GenerarHorasDisponibles();
+    }
+
+    private void GenerarHorasDisponibles()
+    {
+        horasDisponibles.Clear();
+        var startTime = new TimeSpan(10, 0, 0); // 10:00 AM
+        var endTime = new TimeSpan(23, 0, 0); // 11:00 PM
+        var interval = new TimeSpan(1, 0, 0); // Intervalo de 1 hora
+
+        for (var time = startTime; time <= endTime; time += interval)
+        {
+            horasDisponibles.Add($"{time:hh\\:mm}");
+        }
+    }
+
+    private void AgregarReserva()
+    {
+        if (TimeSpan.Parse(horaInicio) >= TimeSpan.Parse(horaFin))
+        {
+            // Manejar el error de hora de inicio mayor o igual a la hora de finalización
+            return;
+        }
+
+        reservas.Add(new Reserva
+        {
+            Fecha = nuevaReserva.Fecha,
+            Cancha = nuevaReserva.Cancha,
+            Horario = $"{horaInicio} - {horaFin}"
+        });
+        nuevaReserva = new Reserva();
+        horaInicio = null;
+        horaFin = null;
+    }
+
+    private void EditarReserva(Reserva reserva)
+    {
+        nuevaReserva = reserva;
+        reservas.Remove(reserva);
+        var horas = reserva.Horario.Split(" - ");
+        horaInicio = horas[0];
+        horaFin = horas[1];
+    }
+
+    private void EliminarReserva(Reserva reserva)
+    {
+        reservas.Remove(reserva);
+    }
+
+    private class Reserva
+    {
+        public DateTime Fecha { get; set; }
+        public string Cancha { get; set; }
+        public string Horario { get; set; }
+    }
+}

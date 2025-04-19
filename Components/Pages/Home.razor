@@ -1,0 +1,145 @@
+﻿@page "/"
+
+<NavMenu />
+
+<main>
+    <!-- Carrusel de imágenes con encabezado -->
+    <section class="carousel-section">
+        <div id="canchasCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="img/cancha7.jpg" class="d-block w-100 carousel-img" alt="Cancha de Fútbol 7">
+                </div>
+                <div class="carousel-item">
+                    <img src="img/canchaMicro.jpg" class="d-block w-100 carousel-img" alt="Cancha de MicroFutbol">
+                </div>
+                <div class="carousel-item">
+                    <img src="img/cancha11.jpg" class="d-block w-100 carousel-img" alt="Cancha de Futbol 11">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#canchasCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#canchasCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+            <div class="carousel-caption d-none d-md-block">
+                <h1 class="text-xl fw-bold">Reserva tu cancha en segundos</h1>
+                <p class="lead">Elige la mejor cancha y juega sin complicaciones.</p>
+                <a href="#reservar" class="btn btn-primary btn-lg mt-3">Reservar Ahora</a>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .carousel-img {
+            height: 300px; /* Ajusta la altura según tus necesidades */
+            object-fit: cover; /* Mantiene la proporción de la imagen */
+        }
+
+        .carousel-caption {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2); /* Fondo semitransparente para mejorar la legibilidad */
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .carousel-caption h1,
+        .carousel-caption p,
+        .carousel-caption a {
+            color: white;
+        }
+    </style>
+
+    <!-- Sección de características -->
+    <section class="features-section text-center">
+        <div class="container">
+            <h2 class="mb-5 fw-bold">¿Por qué elegirnos?</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <i class="bi bi-calendar-check feature-icon"></i>
+                    <h3>Reservación Rápida</h3>
+                    <p>Agenda tu cancha en segundos desde cualquier dispositivo.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-geo-alt feature-icon"></i>
+                    <h3>Ubicación Ideal</h3>
+                    <p>Encuentra canchas cerca de ti en tiempo real.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-trophy feature-icon"></i>
+                    <h3>Instalaciones Premium</h3>
+                    <p>Canchas con iluminación y excelente mantenimiento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de reserva rápida -->
+    <section id="reservar" class="reservation-section">
+        <div class="container text-center">
+            <h2 class="fw-bold">Reserva Ahora</h2>
+            <p>Selecciona la fecha y la cancha que deseas reservar.</p>
+            <form class="reservation-form">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="date" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-control">
+                            <option>Cancha de Fútbol</option>
+                            <option>Cancha de Tenis</option>
+                            <option>Cancha de Padel</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success">Reservar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Sección de testimonios -->
+    <section class="testimonials-section text-center">
+        <div class="container">
+            <h2 class="fw-bold">Testimonios</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial">
+                        <p>"Reservar cancha nunca fue tan fácil. Excelente servicio!"</p>
+                        <h5>- Juan Pérez</h5>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial">
+                        <p>"Las mejores instalaciones y un proceso de reserva rápido."</p>
+                        <h5>- María López</h5>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial">
+                        <p>"Definitivamente la mejor opción para jugar con amigos."</p>
+                        <h5>- Andrés Gómez</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de contacto -->
+    <section class="contact-section text-center">
+        <div class="container">
+            <h2 class="fw-bold">¿Tienes preguntas? Contáctanos</h2>
+            <p>Estamos aquí para ayudarte a reservar la mejor cancha.</p>
+            <a href="mailto:contacto@reservacancha.com" class="btn btn-dark btn-lg">Escríbenos</a>
+        </div>
+    </section>
+
+</main>

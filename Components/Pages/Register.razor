@@ -1,0 +1,85 @@
+﻿@page "/register"
+@using gestionReservas.Models
+@using gestionReservas.Services
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<EditForm Model="nuevoUsuario" OnValidSubmit="RegistrarUsuario">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow rounded">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Registro de Usuario</h3>
+
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre completo</label>
+                            <InputText id="nombre" class="form-control" @bind-Value="nuevoUsuario.Nombre" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="documento" class="form-label">Documento</label>
+                            <InputText id="documento" class="form-control" @bind-Value="nuevoUsuario.Documento" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+                            <InputDate id="fechaNacimiento" class="form-control" @bind-Value="nuevoUsuario.FechaNacimiento" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="nuevoUsuario.Contraseña" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                            <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="ConfirmPassword" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(MensajeError))
+                        {
+                            <div class="alert alert-danger">@MensajeError</div>
+                        }
+
+                        <button type="submit" class="btn btn-success w-100">Registrarse</button>
+
+                        <div class="text-center mt-3">
+                            <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Usuario nuevoUsuario = new();
+    private string ConfirmPassword = string.Empty;
+    private string MensajeError = string.Empty;
+
+    private async Task RegistrarUsuario()
+    {
+        MensajeError = string.Empty;
+
+        if (ConfirmPassword != nuevoUsuario.Contraseña)
+        {
+            MensajeError = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        bool existe = await UserService.UsuarioExiste(nuevoUsuario.Documento);
+        if (existe)
+        {
+            MensajeError = "El usuario ya existe.";
+            return;
+        }
+
+        await UserService.CrearUsuarioAsync(nuevoUsuario);
+        Navigation.NavigateTo("/login");
+    }
+}

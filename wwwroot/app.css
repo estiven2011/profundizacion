@@ -1,0 +1,57 @@
+/* HEADER */
+.hero-section {
+    background: white;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    color: black;
+    padding: 0 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/*SITE*/
+/*.carousel-img {
+    height: 300px; /* Ajusta la altura según tus necesidades */
+    /*object-fit: cover; /* Mantiene la proporción de la imagen */
+
+/* CARACTERÍSTICAS */
+.features-section {
+    padding: 60px 0;
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+/* RESERVA */
+.reservation-section {
+    background: #f8f9fa;
+    padding: 50px 0;
+}
+
+/* TESTIMONIOS */
+.testimonials-section {
+    background: #fff;
+    padding: 60px 0;
+}
+
+.testimonial {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* SECCIÓN DE CONTACTO */
+.contact-section {
+    background: #007bff;
+    padding: 60px 0;
+    color: white;
+}
