@@ -52,7 +52,7 @@
             var rol = await UserService.ObtenerRolAsync(Documento); // 🟢 nuevo
 
             AuthService.IniciarSesion(Documento, nombre ?? "Usuario", rol ?? "Cliente");
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/perfil");
         }
         else
         {

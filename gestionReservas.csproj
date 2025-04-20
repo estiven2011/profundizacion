@@ -14,6 +14,7 @@
     <Content Remove="Components\Pages\Component.razor" />
     <Content Remove="Components\Pages\Component1.razor" />
     <Content Remove="Components\Pages\Component2.razor" />
+    <Content Remove="Components\Pages\perfil.razor" />
   </ItemGroup>
 
   <ItemGroup>

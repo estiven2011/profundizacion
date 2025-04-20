@@ -1,0 +1,55 @@
+﻿@page "/perfil"
+@inject gestionReservas.Services.AuthService Auth
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">Mi Perfil</h3>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (Auth.EstaAutenticado)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-4 font-weight-bold">Nombre:</div>
+                            <div class="col-md-8">@Auth.NombreUsuario</div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4 font-weight-bold">Documento:</div>
+                            <div class="col-md-8">@Auth.Documento</div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4 font-weight-bold">Rol:</div>
+                            <div class="col-md-8">@Auth.Rol</div>
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-danger w-50" @onclick="CerrarSesion">
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning text-center">
+                            No has iniciado sesión. <a href="/login">Haz clic aquí para iniciar sesión</a>.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void CerrarSesion()
+    {
+        Auth.CerrarSesion();
+        Navigation.NavigateTo("/");
+    }
+}
