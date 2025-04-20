@@ -59,6 +59,13 @@ namespace gestionReservas.Services
             return usuario?.Rol;
         }
 
+        // NUEVO
+        public async Task<int?> ObtenerIdPorDocumentoAsync(string documento)
+        {
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Documento == documento);
+            return usuario?.Id;
+        }
 
     }
 }
