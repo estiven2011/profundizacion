@@ -3,31 +3,34 @@
 
 <NavMenu />
 
-<header class="canchas-header">
+<header class="bg-light py-3 border-bottom shadow-sm">
     <div class="container text-center">
-        <h1 class="display-4 fw-bold">Nuestras Canchas</h1>
-        <p class="lead">Explora las canchas disponibles y reserva la tuya</p>
+        <h2 class="fw-bold text-primary mb-2">Nuestras Canchas</h2>
+        <p class="text-muted mb-0" style="font-size: 0.95rem;">Explora las canchas disponibles y reserva tu espacio fácilmente</p>
     </div>
 </header>
 
-<main class="container mt-4">
-    <section class="canchas-list-section">
-        <div class="row">
-            @foreach (var cancha in canchas)
-            {
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <img src="@cancha.Imagen" class="card-img-top" alt="@cancha.Nombre">
-                        <div class="card-body">
-                            <h5 class="card-title">@cancha.Nombre</h5>
-                            <p class="card-text">@cancha.Descripcion</p>
-                            <button class="btn btn-primary" @onclick="() => ReservarCancha(cancha.Nombre)">Reservar</button>
+
+<main class="container mt-3">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var cancha in canchas)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@cancha.Imagen" class="card-img-top rounded-top" alt="@cancha.Nombre">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-dark fw-semibold">@cancha.Nombre</h5>
+                        <p class="card-text text-muted">@cancha.Descripcion</p>
+                        <div class="mt-auto">
+                            <button class="btn btn-outline-primary w-100" @onclick="() => ReservarCancha(cancha.Nombre)">
+                                Reservar
+                            </button>
                         </div>
                     </div>
                 </div>
-            }
-        </div>
-    </section>
+            </div>
+        }
+    </div>
 </main>
 
 @code {
@@ -40,10 +43,9 @@
 
     private void ReservarCancha(string nombreCancha)
     {
-        Console.WriteLine($"Reserva iniciada para {nombreCancha}");
+        // En el futuro podrías pasar el nombre como parámetro
         Navigation.NavigateTo("/reservas");
     }
-
 
     private class Cancha
     {
