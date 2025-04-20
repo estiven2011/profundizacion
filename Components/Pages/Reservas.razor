@@ -1,76 +1,92 @@
 ﻿@page "/reservas"
+@inject gestionReservas.Services.AuthService AuthService
+@inject NavigationManager Navigation
 
 <NavMenu />
 
-<header class="reservas-header">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold">Reservas de Canchas</h1>
-        <p class="lead">Consulta disponibilidad y reserva tu cancha.</p>
+@if (AuthService.EstaAutenticado)
+{
+    <header class="reservas-header">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Reservas de Canchas</h1>
+            <p class="lead">Consulta disponibilidad y reserva tu cancha.</p>
+        </div>
+    </header>
+
+    <main class="container mt-4 mb-4">
+        <section class="reservation-form-section">
+            <h2 class="fw-bold text-center">Agregar Nueva Reserva</h2>
+            <EditForm Model="nuevaReserva" OnValidSubmit="AgregarReserva">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="mb-3">
+                    <label for="fecha" class="form-label">Fecha</label>
+                    <InputDate id="fecha" class="form-control" @bind-Value="nuevaReserva.Fecha" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="mb-3">
+                    <label for="cancha" class="form-label">Tipo de Cancha</label>
+                    <InputSelect id="cancha" class="form-control" @bind-Value="nuevaReserva.Cancha">
+                        @foreach (var tipo in tiposDeCancha)
+                        {
+                            <option value="@tipo">@tipo</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label for="horaInicio" class="form-label">Hora de Inicio</label>
+                    <InputSelect id="horaInicio" class="form-control" @bind-Value="horaInicio">
+                        @foreach (var hora in horasDisponibles)
+                        {
+                            <option value="@hora">@hora</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label for="horaFin" class="form-label">Hora de Finalización</label>
+                    <InputSelect id="horaFin" class="form-control" @bind-Value="horaFin">
+                        @foreach (var hora in horasDisponibles)
+                        {
+                            <option value="@hora">@hora</option>
+                        }
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-primary">Agregar Reserva</button>
+            </EditForm>
+        </section>
+
+        <section class="reservation-list-section mt-5">
+            <h2 class="fw-bold text-center">Reservas Disponibles</h2>
+            <ul class="list-group mt-3">
+                @foreach (var reserva in reservas)
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold">@reserva.Fecha.ToString("yyyy-MM-dd")</h5>
+                                <p>@reserva.Cancha - @reserva.Horario</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-warning me-2" @onclick="() => EditarReserva(reserva)">Editar</button>
+                                <button class="btn btn-danger" @onclick="() => EliminarReserva(reserva)">Eliminar</button>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    </main>
+}
+else
+{
+    <div class="text-center mt-5">
+        <h2 class="text-danger">No tienes acceso a esta vista</h2>
+        <p class="mb-3">Debes iniciar sesión para poder reservar una cancha.</p>
+        <img src="img/acceso-denegado.png" alt="Acceso denegado" class="img-fluid" style="max-width: 300px;" />
+        <div class="mt-4">
+            <a href="/login" class="btn btn-primary">Iniciar Sesión</a>
+        </div>
     </div>
-</header>
-
-<main class="container mt-4 mb-4">
-    <section class="reservation-form-section">
-        <h2 class="fw-bold text-center">Agregar Nueva Reserva</h2>
-        <EditForm Model="nuevaReserva" OnValidSubmit="AgregarReserva">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-            <div class="mb-3">
-                <label for="fecha" class="form-label">Fecha</label>
-                <InputDate id="fecha" class="form-control" @bind-Value="nuevaReserva.Fecha" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
-            </div>
-            <div class="mb-3">
-                <label for="cancha" class="form-label">Tipo de Cancha</label>
-                <InputSelect id="cancha" class="form-control" @bind-Value="nuevaReserva.Cancha">
-                    @foreach (var tipo in tiposDeCancha)
-                    {
-                        <option value="@tipo">@tipo</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="mb-3">
-                <label for="horaInicio" class="form-label">Hora de Inicio</label>
-                <InputSelect id="horaInicio" class="form-control" @bind-Value="horaInicio">
-                    @foreach (var hora in horasDisponibles)
-                    {
-                        <option value="@hora">@hora</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="mb-3">
-                <label for="horaFin" class="form-label">Hora de Finalización</label>
-                <InputSelect id="horaFin" class="form-control" @bind-Value="horaFin">
-                    @foreach (var hora in horasDisponibles)
-                    {
-                        <option value="@hora">@hora</option>
-                    }
-                </InputSelect>
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Reserva</button>
-        </EditForm>
-    </section>
-
-    <section class="reservation-list-section mt-5">
-        <h2 class="fw-bold text-center">Reservas Disponibles</h2>
-        <ul class="list-group mt-3">
-            @foreach (var reserva in reservas)
-            {
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="fw-bold">@reserva.Fecha.ToString("yyyy-MM-dd")</h5>
-                            <p>@reserva.Cancha - @reserva.Horario</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-warning me-2" @onclick="() => EditarReserva(reserva)">Editar</button>
-                            <button class="btn btn-danger" @onclick="() => EliminarReserva(reserva)">Eliminar</button>
-                        </div>
-                    </div>
-                </li>
-            }
-        </ul>
-    </section>
-</main>
+}
 
 @code {
     private List<Reserva> reservas = new()
@@ -96,9 +112,9 @@
     private void GenerarHorasDisponibles()
     {
         horasDisponibles.Clear();
-        var startTime = new TimeSpan(10, 0, 0); // 10:00 AM
-        var endTime = new TimeSpan(23, 0, 0); // 11:00 PM
-        var interval = new TimeSpan(1, 0, 0); // Intervalo de 1 hora
+        var startTime = new TimeSpan(10, 0, 0);
+        var endTime = new TimeSpan(23, 0, 0);
+        var interval = new TimeSpan(1, 0, 0);
 
         for (var time = startTime; time <= endTime; time += interval)
         {
@@ -109,10 +125,7 @@
     private void AgregarReserva()
     {
         if (TimeSpan.Parse(horaInicio) >= TimeSpan.Parse(horaFin))
-        {
-            // Manejar el error de hora de inicio mayor o igual a la hora de finalización
             return;
-        }
 
         reservas.Add(new Reserva
         {
@@ -120,6 +133,7 @@
             Cancha = nuevaReserva.Cancha,
             Horario = $"{horaInicio} - {horaFin}"
         });
+
         nuevaReserva = new Reserva();
         horaInicio = null;
         horaFin = null;
