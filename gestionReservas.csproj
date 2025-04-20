@@ -7,8 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Pages\Admin.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Components\Pages\Component.razor" />
     <Content Remove="Components\Pages\Component1.razor" />
+    <Content Remove="Components\Pages\Component2.razor" />
   </ItemGroup>
 
   <ItemGroup>
