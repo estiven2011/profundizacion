@@ -1,13 +1,45 @@
 ﻿@page "/admin"
 @inject gestionReservas.Services.AuthService Auth
+@inject gestionReservas.Services.UserService UserService
+@using gestionReservas.Models
+
 
 <div class="container mt-5">
     @if (Auth.EstaAutenticado && Auth.Rol == "Admin")
     {
-        <div class="text-center">
-            <h1 class="text-primary mb-4">Panel de Administrador</h1>
+        <div class="text-center mb-5">
+            <h1 class="text-primary mb-2">Panel de Administrador</h1>
             <p class="lead">Bienvenido, @Auth.NombreUsuario</p>
         </div>
+
+        <h3 class="mb-3">Usuarios registrados</h3>
+
+        @if (usuarios == null || usuarios.Count == 0)
+        {
+            <p>No hay usuarios registrados.</p>
+        }
+        else
+        {
+            <table class="table table-hover table-bordered shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in usuarios)
+                    {
+                        <tr>
+                            <td>@u.Nombre</td>
+                            <td>@u.Documento</td>
+                            <td>@u.Rol</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
     else
     {
@@ -24,3 +56,15 @@
         </div>
     }
 </div>
+
+@code {
+    private List<Usuario> usuarios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.EstaAutenticado && Auth.Rol == "Admin")
+        {
+            usuarios = await UserService.ObtenerUsuariosAsync();
+        }
+    }
+}
