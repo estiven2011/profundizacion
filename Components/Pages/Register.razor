@@ -79,6 +79,9 @@
             return;
         }
 
+        // ✅ ESTA ES LA LÍNEA NUEVA QUE TE FALTABA
+        nuevoUsuario.Rol = "Cliente";
+
         await UserService.CrearUsuarioAsync(nuevoUsuario);
         Navigation.NavigateTo("/login");
     }

@@ -15,9 +15,19 @@ namespace gestionReservas.Services
 
         public async Task CrearUsuarioAsync(Usuario usuario)
         {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
+            try
+            {
+                usuario.Rol = "Cliente";
+                _context.Usuarios.Add(usuario);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR AL GUARDAR USUARIO: " + ex.Message);
+                throw;
+            }
         }
+
 
         public async Task<List<Usuario>> ObtenerUsuariosAsync()
         {
@@ -41,6 +51,13 @@ namespace gestionReservas.Services
                 .FirstOrDefaultAsync();
         }
 
+        // NUEVO 
+        public async Task<string?> ObtenerRolAsync(string documento)
+        {
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Documento == documento);
+            return usuario?.Rol;
+        }
 
 
     }
