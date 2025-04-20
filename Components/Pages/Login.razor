@@ -49,8 +49,10 @@
         if (await UserService.ValidarUsuarioAsync(Documento, Password))
         {
             var nombre = await UserService.ObtenerNombreAsync(Documento);
-            AuthService.IniciarSesion(Documento, nombre ?? "Usuario");
-            Navigation.NavigateTo("/");
+            var rol = await UserService.ObtenerRolAsync(Documento); // 🟢 nuevo
+
+            AuthService.IniciarSesion(Documento, nombre ?? "Usuario", rol ?? "Cliente");
+            Navigation.NavigateTo("/perfil");
         }
         else
         {
@@ -58,5 +60,3 @@
         }
     }
 }
-
-

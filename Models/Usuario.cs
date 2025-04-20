@@ -17,6 +17,9 @@ namespace gestionReservas.Models
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
         public string Contraseña { get; set; } = string.Empty;
+
+        [Required]
+        public string Rol { get; set; } = "Cliente";
     }
 
 

@@ -1,0 +1,26 @@
+﻿@page "/admin"
+@inject gestionReservas.Services.AuthService Auth
+
+<div class="container mt-5">
+    @if (Auth.EstaAutenticado && Auth.Rol == "Admin")
+    {
+        <div class="text-center">
+            <h1 class="text-primary mb-4">Panel de Administrador</h1>
+            <p class="lead">Bienvenido, @Auth.NombreUsuario</p>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 60vh;">
+            <img src="https://cdn-icons-png.flaticon.com/512/6197/6197190.png"
+                 alt="Acceso denegado"
+                 width="150"
+                 class="mb-4" />
+
+            <h3 class="text-danger text-center">No tienes permiso para acceder a esta vista.</h3>
+            <p class="text-muted text-center mb-3">Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.</p>
+
+            <a class="btn btn-outline-primary" href="/login">Iniciar sesión</a>
+        </div>
+    }
+</div>
