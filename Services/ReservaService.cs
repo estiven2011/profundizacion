@@ -1,8 +1,4 @@
-﻿// ===============================
-// ReservaService.cs
-// ===============================
-
-using gestionReservas.Data;
+﻿using gestionReservas.Data;
 using gestionReservas.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,11 +27,19 @@ namespace gestionReservas.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditarReservaAsync(Reserva reserva)
+        public async Task EditarReservaAsync(Reserva reservaActualizada)
         {
-            _context.Reservas.Update(reserva);
+            var reservaExistente = await _context.Reservas.FindAsync(reservaActualizada.Id);
+            if (reservaExistente is null) return;
+
+            reservaExistente.Fecha = reservaActualizada.Fecha;
+            reservaExistente.CanchaId = reservaActualizada.CanchaId;
+            reservaExistente.HoraInicio = reservaActualizada.HoraInicio;
+            reservaExistente.HoraFin = reservaActualizada.HoraFin;
+
             await _context.SaveChangesAsync();
         }
+
 
         public async Task EliminarReservaAsync(Reserva reserva)
         {
