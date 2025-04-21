@@ -1,7 +1,6 @@
 ﻿@page "/"
 
 <NavMenu />
-
 <main>
     <!-- Carrusel de imágenes con encabezado -->
     <section class="carousel-section">
@@ -55,6 +54,11 @@
         .carousel-caption a {
             color: white;
         }
+
+        .carousel-caption h1, .carousel-caption p {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
     </style>
 
     <!-- Sección de características -->
@@ -81,30 +85,29 @@
         </div>
     </section>
 
-    <!-- Sección de reserva rápida -->
-    <section id="reservar" class="reservation-section">
-        <div class="container text-center">
-            <h2 class="fw-bold">Reserva Ahora</h2>
-            <p>Selecciona la fecha y la cancha que deseas reservar.</p>
-            <form class="reservation-form">
-                <div class="row">
-                    <div class="col-md-4">
-                        <input type="date" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-control">
-                            <option>Cancha de Fútbol</option>
-                            <option>Cancha de Tenis</option>
-                            <option>Cancha de Padel</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-success">Reservar</button>
-                    </div>
-                </div>
-            </form>
+    <!-- Sección "¿Quiénes somos?" -->
+    <section class="about-section text-center">
+        <div class="container">
+            <h2 class="fw-bold mb-4">¿Quiénes somos?</h2>
+            <p id="txQS"class="lead mb-3">
+                Somos una plataforma dedicada a simplificar la forma en que reservas canchas deportivas. Nuestro objetivo es brindarte
+                una experiencia rápida, confiable y transparente para que solo te concentres en lo que más importa: disfrutar del juego.
+            </p>
+            <p class="lead mb-3">
+                Contamos con una red de canchas aliadas cuidadosamente seleccionadas, tecnología intuitiva, y un equipo que trabaja cada día para que
+                encuentres el lugar perfecto para jugar con tus amigos, entrenar o competir.
+            </p>
         </div>
     </section>
+
+    <style>
+        .about-section {
+            background-color: #007bff;
+            padding: 60px 20px;
+            color: white
+        }
+    </style>
+
 
     <!-- Sección de testimonios -->
     <section class="testimonials-section text-center">
