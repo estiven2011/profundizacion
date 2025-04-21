@@ -71,7 +71,17 @@ else
                     </InputSelect>
                 </div>
 
-                <button class="btn btn-primary w-100">Guardar Reserva</button>
+                <button type="submit" class="btn btn-primary w-100">
+                    @(nuevaReserva.Id == 0 ? "Crear Reserva" : "Actualizar Reserva")
+                </button>
+
+                @if (mostrarAlerta)
+                {
+                    <div class="alert alert-@alertaTipo alert-dismissible fade show mt-3" role="alert">
+                        @alertaMensaje
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                }
             </EditForm>
         </section>
 
@@ -115,9 +125,12 @@ else
     }
 
     private string horaFin;
-
     private List<string> horasDisponibles = new();
     private List<string> horasFinDisponibles = new();
+
+    private string alertaMensaje;
+    private string alertaTipo;
+    private bool mostrarAlerta;
 
     protected override async Task OnInitializedAsync()
     {
@@ -170,9 +183,15 @@ else
         nuevaReserva.HoraFin = TimeSpan.Parse(horaFin);
 
         if (nuevaReserva.Id == 0)
+        {
             await ReservaService.CrearReservaAsync(nuevaReserva);
+            await MostrarAlerta("Reserva creada exitosamente", "success");
+        }
         else
+        {
             await ReservaService.EditarReservaAsync(nuevaReserva);
+            await MostrarAlerta("Reserva actualizada correctamente", "info");
+        }
 
         nuevaReserva = new() { Fecha = DateTime.Today };
         horaInicio = null;
@@ -197,6 +216,19 @@ else
     private async Task EliminarReserva(Reserva reserva)
     {
         await ReservaService.EliminarReservaAsync(reserva);
+        await MostrarAlerta("Reserva eliminada correctamente", "danger");
         await CargarDatos();
+    }
+
+    private async Task MostrarAlerta(string mensaje, string tipo = "success", int duracion = 3000)
+    {
+        alertaMensaje = mensaje;
+        alertaTipo = tipo;
+        mostrarAlerta = true;
+
+        StateHasChanged();
+        await Task.Delay(duracion);
+        mostrarAlerta = false;
+        StateHasChanged();
     }
 }
