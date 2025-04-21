@@ -140,9 +140,15 @@ else
     private async Task CargarDatos()
     {
         canchas = await ReservaService.ObtenerCanchasAsync();
-        reservas = await ReservaService.ObtenerReservasAsync();
+        var todas = await ReservaService.ObtenerReservasAsync();
+
+        reservas = todas
+            .Where(r => r.Usuario.Documento == AuthService.Documento)
+            .ToList();
+
         GenerarHoras();
     }
+
 
     private void GenerarHoras()
     {
