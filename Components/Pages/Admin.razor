@@ -45,6 +45,7 @@
                     {
                         var esPasada = r.Fecha < DateTime.Today;
                         var estaActivaYExpirada = r.Estado == "Activa" && esPasada;
+                        var estaActivaYVigente = r.Estado == "Activa" && !esPasada;
 
                         <tr>
                             <td>@r.Usuario.Nombre</td>
@@ -57,11 +58,7 @@
                                 {
                                     <span class="badge bg-danger">Cancelada</span>
                                 }
-                                else if (estaActivaYExpirada)
-                                {
-                                    <span class="badge bg-primary">Expirada</span>
-                                }
-                                else if (r.Estado == "Activa")
+                                else if (estaActivaYVigente)
                                 {
                                     <span class="badge bg-success">Activa</span>
                                     <button class="btn btn-sm btn-outline-danger"
@@ -69,6 +66,10 @@
                                             @onclick="() => ConfirmarCancelacion(r.Id)">
                                         Cancelar
                                     </button>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Ya pasó</span>
                                 }
                             </td>
                         </tr>
