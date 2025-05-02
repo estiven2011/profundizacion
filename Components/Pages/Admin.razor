@@ -35,7 +35,8 @@
                         <th>Cancha</th>
                         <th>Fecha</th>
                         <th>Horario</th>
-                        <th style="min-width: 180px;">Estado</th>
+                        <th>Estado</th>
+                        <th>Historial</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,14 +45,13 @@
                    .ThenBy(r => r.Fecha))
                     {
                         var esPasada = r.Fecha < DateTime.Today;
-                        var estaActivaYExpirada = r.Estado == "Activa" && esPasada;
                         var estaActivaYVigente = r.Estado == "Activa" && !esPasada;
 
                         <tr>
                             <td>@r.Usuario.Nombre</td>
                             <td>@r.Usuario.Documento</td>
                             <td>@r.Cancha.Nombre</td>
-                            <td>@r.Fecha.ToString("yyyy-MM-dd")</td>
+                            <td>@r.Fecha:yyyy-MM-dd</td>
                             <td>@r.HoraInicio - @r.HoraFin</td>
                             <td class="d-flex align-items-center gap-2">
                                 @if (r.Estado == "Cancelada")
@@ -62,7 +62,6 @@
                                 {
                                     <span class="badge bg-success">Activa</span>
                                     <button class="btn btn-sm btn-outline-danger"
-                                            title="Cancelar esta reserva"
                                             @onclick="() => ConfirmarCancelacion(r.Id)">
                                         Cancelar
                                     </button>
@@ -72,10 +71,76 @@
                                     <span class="badge bg-secondary">Ya pasó</span>
                                 }
                             </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick="() => MostrarHistorial(r.Usuario.Documento, r.Usuario.Nombre)">
+                                    Ver historial
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        }
+
+        @if (mostrarHistorial)
+        {
+            <hr />
+            <h5 class="mt-4 text-primary">Historial de reservas de @nombreUsuarioHistorial</h5>
+
+            @if (historialUsuario is null)
+            {
+                <p>Cargando historial...</p>
+            }
+            else if (!historialUsuario.Any())
+            {
+                <p>Este usuario no tiene reservas.</p>
+            }
+            else
+            {
+                <table class="table table-sm table-striped table-hover mt-2">
+                    <thead>
+                        <tr>
+                            <th>Cancha</th>
+                            <th>Fecha</th>
+                            <th>Horario</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in historialUsuario.OrderByDescending(r => r.Fecha))
+                        {
+                            var estadoFinal = r.Estado == "Activa" && r.Fecha < DateTime.Today
+                            ? "Ya pasó"
+                            : r.Estado;
+
+                            <tr>
+                                <td>@r.Cancha.Nombre</td>
+                                <td>@r.Fecha:yyyy-MM-dd</td>
+                                <td>@r.HoraInicio - @r.HoraFin</td>
+                                <td>
+                                    @if (estadoFinal == "Cancelada")
+                                    {
+                                        <span class="badge bg-danger">Cancelada</span>
+                                    }
+                                    else if (estadoFinal == "Ya pasó")
+                                    {
+                                        <span class="badge bg-secondary">Ya pasó</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Activa</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="() => mostrarHistorial = false">
+                    Cerrar historial
+                </button>
+            }
         }
     }
     else
@@ -87,7 +152,9 @@
                  class="mb-4" />
 
             <h3 class="text-danger text-center">No tienes permiso para acceder a esta vista.</h3>
-            <p class="text-muted text-center mb-3">Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.</p>
+            <p class="text-muted text-center mb-3">
+                Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.
+            </p>
 
             <a class="btn btn-outline-primary" href="/login">Iniciar sesión</a>
         </div>
@@ -97,7 +164,10 @@
 @code {
     private List<Reserva> reservas = new();
     private List<Reserva> reservasFiltradas = new();
+    private List<Reserva> historialUsuario = new();
     private string filtroBusqueda = string.Empty;
+    private bool mostrarHistorial = false;
+    private string nombreUsuarioHistorial = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,20 +186,13 @@
 
     private void AplicarFiltro()
     {
-        if (string.IsNullOrWhiteSpace(filtroBusqueda))
-        {
-            reservasFiltradas = reservas;
-        }
-        else
-        {
-            reservasFiltradas = reservas
+        reservasFiltradas = string.IsNullOrWhiteSpace(filtroBusqueda)
+            ? reservas
+            : reservas
                 .Where(r =>
                     r.Usuario.Nombre.ToLower().Contains(filtroBusqueda) ||
                     r.Usuario.Documento.ToLower().Contains(filtroBusqueda))
                 .ToList();
-        }
-
-        StateHasChanged();
     }
 
     private async Task ConfirmarCancelacion(int reservaId)
@@ -146,5 +209,12 @@
         await ReservaService.CancelarReservaAsync(reservaId);
         reservas = await ReservaService.ObtenerReservasAsync();
         AplicarFiltro();
+    }
+
+    private async Task MostrarHistorial(string documento, string nombre)
+    {
+        historialUsuario = await ReservaService.ObtenerReservasPorDocumentoAsync(documento);
+        nombreUsuarioHistorial = nombre;
+        mostrarHistorial = true;
     }
 }

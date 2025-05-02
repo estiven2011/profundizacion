@@ -37,7 +37,7 @@ namespace gestionReservas.Services
             reservaExistente.CanchaId = reservaActualizada.CanchaId;
             reservaExistente.HoraInicio = reservaActualizada.HoraInicio;
             reservaExistente.HoraFin = reservaActualizada.HoraFin;
-            reservaExistente.Estado = reservaActualizada.Estado; // 🟢 Nuevo
+            reservaExistente.Estado = reservaActualizada.Estado;
 
             await _context.SaveChangesAsync();
         }
@@ -58,7 +58,6 @@ namespace gestionReservas.Services
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Documento == documento);
         }
 
-        // 🟢 NUEVO: Método para cancelar directamente una reserva
         public async Task CancelarReservaAsync(int reservaId)
         {
             var reserva = await _context.Reservas.FindAsync(reservaId);
@@ -66,6 +65,16 @@ namespace gestionReservas.Services
 
             reserva.Estado = "Cancelada";
             await _context.SaveChangesAsync();
+        }
+
+        // ✅ NUEVO: Método para obtener historial de reservas por documento
+        public async Task<List<Reserva>> ObtenerReservasPorDocumentoAsync(string documento)
+        {
+            return await _context.Reservas
+                .Include(r => r.Cancha)
+                .Include(r => r.Usuario)
+                .Where(r => r.Usuario.Documento == documento)
+                .ToListAsync();
         }
     }
 }
