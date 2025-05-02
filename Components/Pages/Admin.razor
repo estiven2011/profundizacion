@@ -2,50 +2,28 @@
 @inject gestionReservas.Services.AuthService Auth
 @inject gestionReservas.Services.UserService UserService
 @inject gestionReservas.Services.ReservaService ReservaService
+@inject IJSRuntime JS
 @using gestionReservas.Models
 
 <div class="container mt-5">
     @if (Auth.EstaAutenticado && Auth.Rol == "Admin")
     {
-        <div class="text-center mb-5">
-            <h1 class="text-primary mb-2">Panel de Administrador</h1>
+        <div class="text-center mb-4">
+            <h1 class="text-primary">Panel de Administrador</h1>
             <p class="lead">Bienvenido, @Auth.NombreUsuario</p>
         </div>
 
-        <!-- Tabla de usuarios -->
-        <h3 class="mb-3">Usuarios registrados</h3>
-        @if (usuarios == null || usuarios.Count == 0)
-        {
-            <p>No hay usuarios registrados.</p>
-        }
-        else
-        {
-            <table class="table table-hover table-bordered shadow-sm">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Documento</th>
-                        <th>Rol</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var u in usuarios)
-                    {
-                        <tr>
-                            <td>@u.Nombre</td>
-                            <td>@u.Documento</td>
-                            <td>@u.Rol</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Reservas registradas</h4>
+            <input type="text"
+                   class="form-control w-50"
+                   placeholder="Buscar por nombre o documento"
+                   @oninput="FiltrarDinamico" />
+        </div>
 
-        <!-- Tabla de reservas -->
-        <h3 class="mt-5 mb-3">Reservas registradas</h3>
-        @if (reservas == null || reservas.Count == 0)
+        @if (reservasFiltradas is null || reservasFiltradas.Count == 0)
         {
-            <p>No hay reservas registradas.</p>
+            <p>No hay reservas que coincidan con la búsqueda.</p>
         }
         else
         {
@@ -53,45 +31,44 @@
                 <thead class="table-light">
                     <tr>
                         <th>Usuario</th>
+                        <th>Documento</th>
                         <th>Cancha</th>
                         <th>Fecha</th>
                         <th>Horario</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
+                        <th style="min-width: 180px;">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var r in reservas)
+                    @foreach (var r in reservasFiltradas
+                   .OrderBy(r => r.Fecha >= DateTime.Today ? 0 : 1)
+                   .ThenBy(r => r.Fecha))
                     {
-                        var estadoFinal = r.Estado;
-
-                        // 🔍 Si la reserva era activa pero la fecha ya pasó, se muestra como Finalizada
-                        if (r.Estado == "Activa" && r.Fecha < DateTime.Today)
-                        {
-                            estadoFinal = "Finalizada";
-                        }
+                        var esPasada = r.Fecha < DateTime.Today;
+                        var estaActivaYExpirada = r.Estado == "Activa" && esPasada;
 
                         <tr>
                             <td>@r.Usuario.Nombre</td>
+                            <td>@r.Usuario.Documento</td>
                             <td>@r.Cancha.Nombre</td>
                             <td>@r.Fecha.ToString("yyyy-MM-dd")</td>
                             <td>@r.HoraInicio - @r.HoraFin</td>
-                            <td>
-                                <span class="badge @(estadoFinal == "Activa" ? "bg-success" :
-                                                     estadoFinal == "Cancelada" ? "bg-danger" : "bg-secondary")">
-                                    @estadoFinal
-                                </span>
-                            </td>
-                            <td>
-                                @if (r.Estado == "Activa" && r.Fecha >= DateTime.Today)
+                            <td class="d-flex align-items-center gap-2">
+                                @if (r.Estado == "Cancelada")
                                 {
-                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => CancelarReserva(r.Id)">
+                                    <span class="badge bg-danger">Cancelada</span>
+                                }
+                                else if (estaActivaYExpirada)
+                                {
+                                    <span class="badge bg-primary">Expirada</span>
+                                }
+                                else if (r.Estado == "Activa")
+                                {
+                                    <span class="badge bg-success">Activa</span>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            title="Cancelar esta reserva"
+                                            @onclick="() => ConfirmarCancelacion(r.Id)">
                                         Cancelar
                                     </button>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">Sin acciones</span>
                                 }
                             </td>
                         </tr>
@@ -107,23 +84,59 @@
                  alt="Acceso denegado"
                  width="150"
                  class="mb-4" />
+
             <h3 class="text-danger text-center">No tienes permiso para acceder a esta vista.</h3>
             <p class="text-muted text-center mb-3">Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.</p>
+
             <a class="btn btn-outline-primary" href="/login">Iniciar sesión</a>
         </div>
     }
 </div>
 
 @code {
-    private List<Usuario> usuarios = new();
     private List<Reserva> reservas = new();
+    private List<Reserva> reservasFiltradas = new();
+    private string filtroBusqueda = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         if (Auth.EstaAutenticado && Auth.Rol == "Admin")
         {
-            usuarios = await UserService.ObtenerUsuariosAsync();
             reservas = await ReservaService.ObtenerReservasAsync();
+            AplicarFiltro();
+        }
+    }
+
+    private void FiltrarDinamico(ChangeEventArgs e)
+    {
+        filtroBusqueda = e.Value?.ToString()?.ToLower() ?? "";
+        AplicarFiltro();
+    }
+
+    private void AplicarFiltro()
+    {
+        if (string.IsNullOrWhiteSpace(filtroBusqueda))
+        {
+            reservasFiltradas = reservas;
+        }
+        else
+        {
+            reservasFiltradas = reservas
+                .Where(r =>
+                    r.Usuario.Nombre.ToLower().Contains(filtroBusqueda) ||
+                    r.Usuario.Documento.ToLower().Contains(filtroBusqueda))
+                .ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarCancelacion(int reservaId)
+    {
+        bool confirmar = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de que deseas cancelar esta reserva?");
+        if (confirmar)
+        {
+            await CancelarReserva(reservaId);
         }
     }
 
@@ -131,6 +144,6 @@
     {
         await ReservaService.CancelarReservaAsync(reservaId);
         reservas = await ReservaService.ObtenerReservasAsync();
-        StateHasChanged();
+        AplicarFiltro();
     }
 }
