@@ -44,8 +44,9 @@
                    .OrderBy(r => r.Fecha >= DateTime.Today ? 0 : 1)
                    .ThenBy(r => r.Fecha))
                     {
-                        var esPasada = r.Fecha < DateTime.Today;
-                        var estaActivaYVigente = r.Estado == "Activa" && !esPasada;
+                        var esActiva = r.Estado?.Trim().ToLower() == "activa";
+                        var estaActivaYVigente = esActiva && r.Fecha >= DateTime.Today;
+                        var estaActivaYExpirada = esActiva && r.Fecha < DateTime.Today;
 
                         <tr>
                             <td>@r.Usuario.Nombre</td>
@@ -66,9 +67,13 @@
                                         Cancelar
                                     </button>
                                 }
-                                else
+                                else if (estaActivaYExpirada)
                                 {
                                     <span class="badge bg-secondary">Ya pasó</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-dark">Estado desconocido</span>
                                 }
                             </td>
                             <td>
@@ -110,9 +115,9 @@
                     <tbody>
                         @foreach (var r in historialUsuario.OrderByDescending(r => r.Fecha))
                         {
-                            var estadoFinal = r.Estado == "Activa" && r.Fecha < DateTime.Today
-                            ? "Ya pasó"
-                            : r.Estado;
+                            var esActiva = r.Estado?.Trim().ToLower() == "activa";
+                            var estaExpirada = esActiva && r.Fecha < DateTime.Today;
+                            var estadoFinal = estaExpirada ? "Ya pasó" : r.Estado?.Trim();
 
                             <tr>
                                 <td>@r.Cancha.Nombre</td>
@@ -127,9 +132,13 @@
                                     {
                                         <span class="badge bg-secondary">Ya pasó</span>
                                     }
-                                    else
+                                    else if (estadoFinal == "Activa")
                                     {
                                         <span class="badge bg-success">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-dark">Estado desconocido</span>
                                     }
                                 </td>
                             </tr>
