@@ -23,6 +23,7 @@ namespace gestionReservas.Services
 
         public async Task CrearReservaAsync(Reserva reserva)
         {
+            reserva.Estado = "Activa"; // 🟢 Nuevo: todas las reservas nuevas son activas
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
         }
@@ -36,10 +37,10 @@ namespace gestionReservas.Services
             reservaExistente.CanchaId = reservaActualizada.CanchaId;
             reservaExistente.HoraInicio = reservaActualizada.HoraInicio;
             reservaExistente.HoraFin = reservaActualizada.HoraFin;
+            reservaExistente.Estado = reservaActualizada.Estado; // 🟢 Nuevo
 
             await _context.SaveChangesAsync();
         }
-
 
         public async Task EliminarReservaAsync(Reserva reserva)
         {
@@ -55,6 +56,16 @@ namespace gestionReservas.Services
         public async Task<Usuario?> ObtenerUsuarioPorDocumento(string documento)
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Documento == documento);
+        }
+
+        // 🟢 NUEVO: Método para cancelar directamente una reserva
+        public async Task CancelarReservaAsync(int reservaId)
+        {
+            var reserva = await _context.Reservas.FindAsync(reservaId);
+            if (reserva is null) return;
+
+            reserva.Estado = "Cancelada";
+            await _context.SaveChangesAsync();
         }
     }
 }

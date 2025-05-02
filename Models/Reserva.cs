@@ -28,5 +28,9 @@ namespace gestionReservas.Models
 
         [Required]
         public TimeSpan HoraFin { get; set; }
+
+        [Required]
+        public string Estado { get; set; } = "Activa";
+
     }
 }
