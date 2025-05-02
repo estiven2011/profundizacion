@@ -67,13 +67,10 @@
                                         Cancelar
                                     </button>
                                 }
-                                else if (estaActivaYExpirada)
-                                {
-                                    <span class="badge bg-secondary">Ya pasó</span>
-                                }
+                                
                                 else
                                 {
-                                    <span class="badge bg-dark">Estado desconocido</span>
+                                    <span class="badge bg-secondary">Ya expiró</span>
                                 }
                             </td>
                             <td>
@@ -128,17 +125,14 @@
                                     {
                                         <span class="badge bg-danger">Cancelada</span>
                                     }
-                                    else if (estadoFinal == "Ya pasó")
-                                    {
-                                        <span class="badge bg-secondary">Ya pasó</span>
-                                    }
+                                    
                                     else if (estadoFinal == "Activa")
                                     {
                                         <span class="badge bg-success">Activa</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-dark">Estado desconocido</span>
+                                        <span class="badge bg-secondary">Ya expiró</span>
                                     }
                                 </td>
                             </tr>
@@ -146,7 +140,7 @@
                     </tbody>
                 </table>
 
-                <button class="btn btn-sm btn-outline-secondary mt-2" @onclick="() => mostrarHistorial = false">
+                <button class="btn btn-sm btn-outline-secondary mt-2 mb-3" @onclick="() => mostrarHistorial = false">
                     Cerrar historial
                 </button>
             }
