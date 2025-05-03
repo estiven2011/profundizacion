@@ -33,6 +33,7 @@ else
             <EditForm Model="nuevaReserva" OnValidSubmit="GuardarReserva">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
+
                 <div class="mb-3">
                     <label class="form-label">Fecha</label>
                     <InputDate class="form-control"
@@ -86,7 +87,7 @@ else
         </section>
 
         <section class="reservation-list-section mt-5">
-            <h2 class="fw-bold text-center">Reservas Existentes</h2>
+            <h2 class="fw-bold text-center">Mis Reservas</h2>
             <ul class="list-group mt-3">
                 @foreach (var reserva in reservas)
                 {
@@ -95,11 +96,25 @@ else
                             <div>
                                 <strong>@reserva.Usuario.Nombre</strong> - @reserva.Cancha.Nombre<br />
                                 @reserva.Fecha.ToShortDateString() | @reserva.HoraInicio - @reserva.HoraFin
+                                <br />
+                                <span class="badge @(reserva.Estado == "Activa" ? "bg-success" : "bg-danger")">
+                                    @reserva.Estado
+                                </span>
                             </div>
-                            <div>
-                                <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarReserva(reserva)">Editar</button>
-                                <button class="btn btn-danger btn-sm" @onclick="() => EliminarReserva(reserva)">Eliminar</button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-warning btn-sm @(reserva.Estado != "Activa" || reserva.Fecha < DateTime.Today ? "opacity-50" : "")"
+                                        disabled="@(reserva.Estado != "Activa" || reserva.Fecha < DateTime.Today)"
+                                        title="@(reserva.Estado != "Activa" ? "Reserva cancelada" : reserva.Fecha < DateTime.Today ? "No editable por ser pasada" : "")"
+                                        @onclick="() => EditarReserva(reserva)">
+                                    Editar
+                                </button>
+
+                                @if (reserva.Estado == "Activa" && reserva.Fecha >= DateTime.Today)
+                                {
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => CancelarReserva(reserva.Id)">Cancelar</button>
+                                }
                             </div>
+
                         </div>
                     </li>
                 }
@@ -148,7 +163,6 @@ else
 
         GenerarHoras();
     }
-
 
     private void GenerarHoras()
     {
@@ -208,21 +222,24 @@ else
 
     private void EditarReserva(Reserva reserva)
     {
+        if (reserva.Estado != "Activa") return;
+
         nuevaReserva = new Reserva
         {
             Id = reserva.Id,
             Fecha = reserva.Fecha,
             CanchaId = reserva.CanchaId,
-            UsuarioId = reserva.UsuarioId
+            UsuarioId = reserva.UsuarioId,
+            Estado = reserva.Estado
         };
         horaInicio = reserva.HoraInicio.ToString(@"hh\:mm");
         horaFin = reserva.HoraFin.ToString(@"hh\:mm");
     }
 
-    private async Task EliminarReserva(Reserva reserva)
+    private async Task CancelarReserva(int reservaId)
     {
-        await ReservaService.EliminarReservaAsync(reserva);
-        await MostrarAlerta("Reserva eliminada correctamente", "danger");
+        await ReservaService.CancelarReservaAsync(reservaId);
+        await MostrarAlerta("Reserva cancelada correctamente", "warning");
         await CargarDatos();
     }
 
