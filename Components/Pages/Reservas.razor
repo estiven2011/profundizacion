@@ -25,6 +25,12 @@ else
             <h1 class="display-4 fw-bold">Reservas de Canchas</h1>
             <p class="lead">Consulta disponibilidad y reserva tu cancha.</p>
         </div>
+        @if (tieneReservasHoy)
+        {
+            <div class="alert alert-info text-center">
+                ¡Tienes reservas programadas para hoy!
+            </div>
+        }
     </header>
 
     <main class="container mt-4 mb-4">
@@ -92,6 +98,7 @@ else
 
         <section class="reservation-list-section mt-5">
             <h2 class="fw-bold text-center">Mis Reservas</h2>
+
             <ul class="list-group mt-3">
                 @foreach (var reserva in reservas)
                 {
@@ -167,6 +174,8 @@ else
     private string alertaMensaje;
     private string alertaTipo;
     private bool mostrarAlerta;
+    private bool tieneReservasHoy = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -182,9 +191,15 @@ else
             .Where(r => r.Usuario.Documento == AuthService.Documento)
             .ToList();
 
+        // ✅ Verificar si hay reservas activas para hoy
+        tieneReservasHoy = reservas.Any(r =>
+            r.Estado == "Activa" &&
+            r.Fecha.Date == DateTime.Today);
+
         GenerarHoras();
         CalcularHorasOcupadas();
     }
+
 
     private void GenerarHoras()
     {
