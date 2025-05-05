@@ -50,12 +50,24 @@
         </div>
 
         <div class="mb-3 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Reservas registradas</h4>
-            <input type="text"
-                   class="form-control w-50"
-                   placeholder="Buscar por nombre o documento"
-                   @oninput="FiltrarDinamico" />
-        </div>
+    <h4 class="mb-0">Reservas registradas</h4>
+
+    <div class="d-flex gap-2 w-75">
+        <input type="text"
+               class="form-control"
+               placeholder="Buscar por nombre o documento"
+               @oninput="FiltrarDinamico" />
+
+                <select class="form-select" @bind="filtroEstado">
+
+            <option value="">-- Estado --</option>
+            <option value="Activa">Activa</option>
+            <option value="Cancelada">Cancelada</option>
+            <option value="Expirada">Ya expiró</option>
+        </select>
+    </div>
+</div>
+
 
         @if (reservasFiltradas is null || reservasFiltradas.Count == 0)
         {
@@ -182,16 +194,29 @@
     }
     else
     {
-        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 60vh;">
-            <img src="https://cdn-icons-png.flaticon.com/512/6197/6197190.png"
-                 alt="Acceso denegado"
-                 width="150"
-                 class="mb-4" />
-            <h3 class="text-danger text-center">No tienes permiso para acceder a esta vista.</h3>
-            <p class="text-muted text-center mb-3">
-                Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.
-            </p>
-            <a class="btn btn-outline-primary" href="/login">Iniciar sesión</a>
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-lg border-0 rounded-3">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3 class="mb-0">Reservas</h3>
+                        </div>
+                        <div class="text-center p-4">
+                            <img src="https://cdn-icons-png.flaticon.com/512/5624/5624013.png" alt="Acceso restringido" style="max-width: 150px;" class="mb-3" />
+
+                            <h5 class="text-danger fw-bold">Acceso restringido - No tienes acceso a esta vista</h5>
+
+
+                            <p class="text-muted">Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.</p>
+
+                            <a href="/login" class="btn btn-outline-primary px-4 mt-2">
+                                Iniciar sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </div>
@@ -209,6 +234,19 @@
     private int activasHoy = 0;
     private int canceladasHoy = 0;
     private int expiradasHoy = 0;
+
+    private string _filtroEstado = "";
+    private string filtroEstado
+    {
+        get => _filtroEstado;
+        set
+        {
+            _filtroEstado = value;
+            AplicarFiltro();
+        }
+    }
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -235,14 +273,27 @@
 
     private void AplicarFiltro()
     {
-        reservasFiltradas = string.IsNullOrWhiteSpace(filtroBusqueda)
-            ? reservas
-            : reservas
-                .Where(r =>
+        reservasFiltradas = reservas
+            .Where(r =>
+            {
+                var coincideBusqueda = string.IsNullOrWhiteSpace(filtroBusqueda) ||
                     r.Usuario.Nombre.ToLower().Contains(filtroBusqueda) ||
-                    r.Usuario.Documento.ToLower().Contains(filtroBusqueda))
-                .ToList();
+                    r.Usuario.Documento.ToLower().Contains(filtroBusqueda);
+
+                // Detectar si es una reserva expirada
+                var esActiva = r.Estado?.Trim().ToLower() == "activa";
+                var estadoFinal = r.Estado;
+
+                if (esActiva && r.Fecha < DateTime.Today)
+                    estadoFinal = "Expirada";
+
+                var coincideEstado = string.IsNullOrWhiteSpace(filtroEstado) || estadoFinal == filtroEstado;
+
+                return coincideBusqueda && coincideEstado;
+            })
+            .ToList();
     }
+
 
     private async Task ConfirmarCancelacion(int reservaId)
     {

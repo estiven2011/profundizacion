@@ -36,10 +36,18 @@
                     }
                     else
                     {
-                        <div class="alert alert-warning text-center">
-                            No has iniciado sesión. <a href="/login">Haz clic aquí para iniciar sesión</a>.
+                        <div class="text-center p-4">
+                            <img src="img/lock.png" alt="Acceso restringido" style="max-width: 150px;" class="mb-3" />
+
+                            <h5 class="text-danger fw-bold">Acceso restringido</h5>
+                            <p class="text-muted">Debes iniciar sesión para ver los detalles de tu perfil.</p>
+
+                            <a href="/login" class="btn btn-outline-primary px-4 mt-2">
+                                Iniciar sesión
+                            </a>
                         </div>
                     }
+
                 </div>
             </div>
         </div>
