@@ -4,6 +4,8 @@
 @inject gestionReservas.Services.ReservaService ReservaService
 @inject gestionReservas.Services.UserService UserService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+
 
 <NavMenu />
 
@@ -148,7 +150,8 @@ else
 
                                 @if (reserva.Estado == "Activa" && reserva.Fecha >= DateTime.Today)
                                 {
-                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => CancelarReserva(reserva.Id)">Cancelar</button>
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmarCancelacion(reserva.Id)">Cancelar</button>
+
                                 }
                             </div>
                         </div>
@@ -351,5 +354,15 @@ else
         mostrarAlerta = false;
         StateHasChanged();
     }
+
+    private async Task ConfirmarCancelacion(int reservaId)
+    {
+        bool confirmar = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de que deseas cancelar esta reserva?");
+        if (confirmar)
+        {
+            await CancelarReserva(reservaId);
+        }
+    }
+
 }
 
