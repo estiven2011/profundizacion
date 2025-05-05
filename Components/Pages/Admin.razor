@@ -50,12 +50,24 @@
         </div>
 
         <div class="mb-3 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Reservas registradas</h4>
-            <input type="text"
-                   class="form-control w-50"
-                   placeholder="Buscar por nombre o documento"
-                   @oninput="FiltrarDinamico" />
-        </div>
+    <h4 class="mb-0">Reservas registradas</h4>
+
+    <div class="d-flex gap-2 w-75">
+        <input type="text"
+               class="form-control"
+               placeholder="Buscar por nombre o documento"
+               @oninput="FiltrarDinamico" />
+
+                <select class="form-select" @bind="filtroEstado">
+
+            <option value="">-- Estado --</option>
+            <option value="Activa">Activa</option>
+            <option value="Cancelada">Cancelada</option>
+            <option value="Expirada">Ya expiró</option>
+        </select>
+    </div>
+</div>
+
 
         @if (reservasFiltradas is null || reservasFiltradas.Count == 0)
         {
@@ -223,6 +235,19 @@
     private int canceladasHoy = 0;
     private int expiradasHoy = 0;
 
+    private string _filtroEstado = "";
+    private string filtroEstado
+    {
+        get => _filtroEstado;
+        set
+        {
+            _filtroEstado = value;
+            AplicarFiltro();
+        }
+    }
+
+
+
     protected override async Task OnInitializedAsync()
     {
         if (Auth.EstaAutenticado && Auth.Rol == "Admin")
@@ -248,14 +273,27 @@
 
     private void AplicarFiltro()
     {
-        reservasFiltradas = string.IsNullOrWhiteSpace(filtroBusqueda)
-            ? reservas
-            : reservas
-                .Where(r =>
+        reservasFiltradas = reservas
+            .Where(r =>
+            {
+                var coincideBusqueda = string.IsNullOrWhiteSpace(filtroBusqueda) ||
                     r.Usuario.Nombre.ToLower().Contains(filtroBusqueda) ||
-                    r.Usuario.Documento.ToLower().Contains(filtroBusqueda))
-                .ToList();
+                    r.Usuario.Documento.ToLower().Contains(filtroBusqueda);
+
+                // Detectar si es una reserva expirada
+                var esActiva = r.Estado?.Trim().ToLower() == "activa";
+                var estadoFinal = r.Estado;
+
+                if (esActiva && r.Fecha < DateTime.Today)
+                    estadoFinal = "Expirada";
+
+                var coincideEstado = string.IsNullOrWhiteSpace(filtroEstado) || estadoFinal == filtroEstado;
+
+                return coincideBusqueda && coincideEstado;
+            })
+            .ToList();
     }
+
 
     private async Task ConfirmarCancelacion(int reservaId)
     {
