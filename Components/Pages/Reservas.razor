@@ -89,6 +89,7 @@ else
             </EditForm>
         </section>
 
+
         <section class="reservation-list-section mt-5">
             <h2 class="fw-bold text-center">Mis Reservas</h2>
             <ul class="list-group mt-3">
@@ -100,9 +101,24 @@ else
                                 <strong>@reserva.Usuario.Nombre</strong> - @reserva.Cancha.Nombre<br />
                                 @reserva.Fecha.ToShortDateString() | @reserva.HoraInicio - @reserva.HoraFin
                                 <br />
-                                <span class="badge @(reserva.Estado == "Activa" ? "bg-success" : "bg-danger")">
-                                    @reserva.Estado
-                                </span>
+                                @{
+                                    var estadoMostrado = reserva.Estado;
+
+                                    if (reserva.Estado == "Activa" && reserva.Fecha < DateTime.Today)
+                                    {
+                                        estadoMostrado = "Ya expiró";
+                                    }
+
+                                    var claseBadge = estadoMostrado switch
+                                    {
+                                        "Activa" => "bg-success",
+                                        "Cancelada" => "bg-danger",
+                                        "Ya expiró" => "bg-secondary",
+                                        _ => "bg-dark"
+                                    };
+                                }
+                                <span class="badge @claseBadge">@estadoMostrado</span>
+
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <button class="btn btn-warning btn-sm @(reserva.Estado != "Activa" || reserva.Fecha < DateTime.Today ? "opacity-50" : "")"
@@ -127,7 +143,8 @@ else
 }
 
 @code {
-    private List<Reserva> reservas = new();
+    private List<Reserva> reservas = new(); // solo las del usuario actual
+    private List<Reserva> todasLasReservas = new(); // todas las reservas activas
     private List<Cancha> canchas = new();
     private Reserva nuevaReserva = new() { Fecha = DateTime.Today };
 
@@ -159,13 +176,14 @@ else
     private async Task CargarDatos()
     {
         canchas = await ReservaService.ObtenerCanchasAsync();
-        var todas = await ReservaService.ObtenerReservasAsync();
+        todasLasReservas = await ReservaService.ObtenerReservasAsync();
 
-        reservas = todas
+        reservas = todasLasReservas
             .Where(r => r.Usuario.Documento == AuthService.Documento)
             .ToList();
 
         GenerarHoras();
+        CalcularHorasOcupadas();
     }
 
     private void GenerarHoras()
@@ -201,7 +219,7 @@ else
 
         if (nuevaReserva.CanchaId != 0)
         {
-            var reservasMismaCanchaYFecha = reservas
+            var reservasMismaCanchaYFecha = todasLasReservas
                 .Where(r =>
                     r.CanchaId == nuevaReserva.CanchaId &&
                     r.Fecha.Date == nuevaReserva.Fecha.Date &&
@@ -232,6 +250,27 @@ else
         nuevaReserva.HoraInicio = TimeSpan.Parse(horaInicio);
         nuevaReserva.HoraFin = TimeSpan.Parse(horaFin);
 
+        // ✅ CONSULTAMOS TODAS LAS RESERVAS MÁS ACTUALES
+        var todas = await ReservaService.ObtenerReservasAsync();
+
+        var solapadas = todas.Any(r =>
+            r.Id != nuevaReserva.Id &&
+            r.CanchaId == nuevaReserva.CanchaId &&
+            r.Fecha.Date == nuevaReserva.Fecha.Date &&
+            r.Estado == "Activa" &&
+            (
+                (nuevaReserva.HoraInicio >= r.HoraInicio && nuevaReserva.HoraInicio < r.HoraFin) || // inicia dentro
+                (nuevaReserva.HoraFin > r.HoraInicio && nuevaReserva.HoraFin <= r.HoraFin) ||       // termina dentro
+                (nuevaReserva.HoraInicio <= r.HoraInicio && nuevaReserva.HoraFin >= r.HoraFin)      // cubre totalmente otra
+            )
+        );
+
+        if (solapadas)
+        {
+            await MostrarAlerta("Este horario ya está reservado para esa cancha. Elige otro horario.", "danger");
+            return;
+        }
+
         if (nuevaReserva.Id == 0)
         {
             await ReservaService.CrearReservaAsync(nuevaReserva);
@@ -250,18 +289,19 @@ else
         await CargarDatos();
     }
 
+
     private void EditarReserva(Reserva reserva)
     {
         if (reserva.Estado != "Activa") return;
 
         nuevaReserva = new Reserva
-        {
-            Id = reserva.Id,
-            Fecha = reserva.Fecha,
-            CanchaId = reserva.CanchaId,
-            UsuarioId = reserva.UsuarioId,
-            Estado = reserva.Estado
-        };
+            {
+                Id = reserva.Id,
+                Fecha = reserva.Fecha,
+                CanchaId = reserva.CanchaId,
+                UsuarioId = reserva.UsuarioId,
+                Estado = reserva.Estado
+            };
         horaInicio = reserva.HoraInicio.ToString(@"hh\:mm");
         horaFin = reserva.HoraFin.ToString(@"hh\:mm");
         CalcularHorasOcupadas();
@@ -287,3 +327,4 @@ else
         StateHasChanged();
     }
 }
+
