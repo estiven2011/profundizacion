@@ -76,5 +76,14 @@ namespace gestionReservas.Services
                 .Where(r => r.Usuario.Documento == documento)
                 .ToListAsync();
         }
+
+        //NUEVO
+        public async Task<List<Reserva>> ObtenerReservasPorCanchaYFecha(int canchaId, DateTime fecha)
+        {
+            return await _context.Reservas
+                .Where(r => r.CanchaId == canchaId && r.Fecha == fecha && r.Estado == "Activa")
+                .ToListAsync();
+        }
+
     }
 }

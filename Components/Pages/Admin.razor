@@ -13,6 +13,42 @@
             <p class="lead">Bienvenido, @Auth.NombreUsuario</p>
         </div>
 
+        <!-- PANEL DE RESUMEN -->
+        <div class="row mb-4 text-center">
+            <div class="col-md-3 mb-2">
+                <div class="card border-success shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-success">Activas hoy</h6>
+                        <h3>@activasHoy</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-danger">Canceladas hoy</h6>
+                        <h3>@canceladasHoy</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="card border-secondary shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-secondary">Expiradas hoy</h6>
+                        <h3>@expiradasHoy</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-primary">Total hoy</h6>
+                        <h3>@reservasHoy</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-3 d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Reservas registradas</h4>
             <input type="text"
@@ -67,7 +103,6 @@
                                         Cancelar
                                     </button>
                                 }
-                                
                                 else
                                 {
                                     <span class="badge bg-secondary">Ya expiró</span>
@@ -125,7 +160,6 @@
                                     {
                                         <span class="badge bg-danger">Cancelada</span>
                                     }
-                                    
                                     else if (estadoFinal == "Activa")
                                     {
                                         <span class="badge bg-success">Activa</span>
@@ -153,12 +187,10 @@
                  alt="Acceso denegado"
                  width="150"
                  class="mb-4" />
-
             <h3 class="text-danger text-center">No tienes permiso para acceder a esta vista.</h3>
             <p class="text-muted text-center mb-3">
                 Debes iniciar sesión como <strong>Administrador</strong> para ver esta sección.
             </p>
-
             <a class="btn btn-outline-primary" href="/login">Iniciar sesión</a>
         </div>
     }
@@ -172,12 +204,26 @@
     private bool mostrarHistorial = false;
     private string nombreUsuarioHistorial = "";
 
+    // Contadores del dashboard
+    private int reservasHoy = 0;
+    private int activasHoy = 0;
+    private int canceladasHoy = 0;
+    private int expiradasHoy = 0;
+
     protected override async Task OnInitializedAsync()
     {
         if (Auth.EstaAutenticado && Auth.Rol == "Admin")
         {
             reservas = await ReservaService.ObtenerReservasAsync();
             AplicarFiltro();
+
+            var hoy = DateTime.Today;
+            var reservasDelDia = reservas.Where(r => r.Fecha == hoy).ToList();
+
+            reservasHoy = reservasDelDia.Count;
+            activasHoy = reservasDelDia.Count(r => r.Estado?.ToLower() == "activa");
+            canceladasHoy = reservasDelDia.Count(r => r.Estado?.ToLower() == "cancelada");
+            expiradasHoy = reservasDelDia.Count(r => r.Estado?.ToLower() == "activa" && r.Fecha < hoy);
         }
     }
 
