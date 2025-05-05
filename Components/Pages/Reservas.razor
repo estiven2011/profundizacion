@@ -38,12 +38,13 @@ else
                     <label class="form-label">Fecha</label>
                     <InputDate class="form-control"
                                @bind-Value="nuevaReserva.Fecha"
-                               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               @onchange="_ => CalcularHorasOcupadas()" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Cancha</label>
-                    <InputSelect class="form-control" @bind-Value="nuevaReserva.CanchaId">
+                    <InputSelect class="form-control" @bind-Value="nuevaReserva.CanchaId" @onchange="_ => CalcularHorasOcupadas()">
                         <option disabled value="0">-- Selecciona una cancha --</option>
                         @foreach (var cancha in canchas)
                         {
@@ -57,7 +58,8 @@ else
                     <InputSelect class="form-control" @bind-Value="horaInicio">
                         @foreach (var h in horasDisponibles)
                         {
-                            <option value="@h">@h</option>
+                            var ocupada = HorasOcupadas.Contains(h);
+                            <option disabled="@ocupada" value="@h">@h @(ocupada ? "(Ocupada)" : "")</option>
                         }
                     </InputSelect>
                 </div>
@@ -67,7 +69,8 @@ else
                     <InputSelect class="form-control" @bind-Value="horaFin">
                         @foreach (var h in horasFinDisponibles)
                         {
-                            <option value="@h">@h</option>
+                            var ocupada = HorasOcupadas.Contains(h);
+                            <option disabled="@ocupada" value="@h">@h @(ocupada ? "(Ocupada)" : "")</option>
                         }
                     </InputSelect>
                 </div>
@@ -142,6 +145,7 @@ else
     private string horaFin;
     private List<string> horasDisponibles = new();
     private List<string> horasFinDisponibles = new();
+    private List<string> HorasOcupadas = new();
 
     private string alertaMensaje;
     private string alertaTipo;
@@ -191,6 +195,32 @@ else
         }
     }
 
+    private void CalcularHorasOcupadas()
+    {
+        HorasOcupadas.Clear();
+
+        if (nuevaReserva.CanchaId != 0)
+        {
+            var reservasMismaCanchaYFecha = reservas
+                .Where(r =>
+                    r.CanchaId == nuevaReserva.CanchaId &&
+                    r.Fecha.Date == nuevaReserva.Fecha.Date &&
+                    r.Estado == "Activa" &&
+                    (nuevaReserva.Id == 0 || r.Id != nuevaReserva.Id))
+                .ToList();
+
+            foreach (var r in reservasMismaCanchaYFecha)
+            {
+                var inicio = r.HoraInicio;
+                var fin = r.HoraFin;
+                for (var h = inicio; h < fin; h += TimeSpan.FromHours(1))
+                {
+                    HorasOcupadas.Add(h.ToString(@"hh\:mm"));
+                }
+            }
+        }
+    }
+
     private async Task GuardarReserva()
     {
         if (TimeSpan.Parse(horaInicio) >= TimeSpan.Parse(horaFin)) return;
@@ -234,6 +264,8 @@ else
         };
         horaInicio = reserva.HoraInicio.ToString(@"hh\:mm");
         horaFin = reserva.HoraFin.ToString(@"hh\:mm");
+        CalcularHorasOcupadas();
+        GenerarHorasFin();
     }
 
     private async Task CancelarReserva(int reservaId)
