@@ -56,7 +56,6 @@
                    @oninput="FiltrarDinamico" />
 
             <select class="form-select" @bind="filtroEstado">
-
                 <option value="">-- Estado --</option>
                 <option value="Activa">Activa</option>
                 <option value="Cancelada">Cancelada</option>
@@ -84,8 +83,8 @@
                 </thead>
                 <tbody>
                     @foreach (var r in reservasFiltradas
-                        .OrderBy(r => r.Fecha >= DateTime.Today ? 0 : 1)
-                        .ThenBy(r => r.Fecha))
+                   .OrderBy(r => r.Fecha >= DateTime.Today ? 0 : 1)
+                   .ThenBy(r => r.Fecha))
                     {
                         var ahora = DateTime.Now;
                         var esActiva = r.Estado?.Trim().ToLower() == "activa";
@@ -96,7 +95,7 @@
                             <td>@r.Usuario.Nombre</td>
                             <td>@r.Usuario.Documento</td>
                             <td>@r.Cancha.Nombre</td>
-                            <td>@r.Fecha:yyyy-MM-dd</td>
+                            <td>@r.Fecha.ToString("yyyy-MM-dd")</td>
                             <td>@r.HoraInicio - @r.HoraFin</td>
                             <td class="d-flex align-items-center gap-2">
                                 @if (r.Estado == "Cancelada")
@@ -155,7 +154,7 @@
 
                         <tr>
                             <td>@r.Cancha.Nombre</td>
-                            <td>@r.Fecha:yyyy-MM-dd</td>
+                            <td>@r.Fecha.ToString("yyyy-MM-dd")</td>
                             <td>@r.HoraInicio - @r.HoraFin</td>
                             <td>
                                 @if (r.Estado == "Cancelada")
