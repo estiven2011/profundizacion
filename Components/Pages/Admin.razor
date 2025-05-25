@@ -100,15 +100,16 @@
                             <td class="d-flex align-items-center gap-2">
                                 @if (r.Estado == "Cancelada")
                                 {
-                                    <span class="badge bg-danger">Cancelada</span>
+                                    <span class="badge bg-danger" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Cancelada</span>
                                 }
                                 else if (estaHoyYExpirada)
                                 {
-                                    <span class="badge bg-secondary">Ya expiró</span>
+                                    <span class="badge bg-secondary" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Ya expiró</span>
                                 }
                                 else if (estaActivaYVigente)
                                 {
-                                    <span class="badge bg-success">Activa</span>
+                                    <span class="badge bg-success" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Activa</span>
+
                                     <button class="btn btn-sm btn-outline-danger"
                                             @onclick="() => ConfirmarCancelacion(r.Id)">
                                         Cancelar
@@ -159,15 +160,16 @@
                             <td>
                                 @if (r.Estado == "Cancelada")
                                 {
-                                    <span class="badge bg-danger">Cancelada</span>
+                                    <span class="badge bg-danger" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Cancelada</span>
                                 }
                                 else if (estaExpirada || r.Fecha < DateTime.Today)
                                 {
-                                    <span class="badge bg-secondary">Ya expiró</span>
+                                    <span class="badge bg-secondary" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Ya expiró</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success">Activa</span>
+                                    <span class="badge bg-success" d-inline-flex align-items-center" style="font-size: 0.875rem; padding: 0.25rem 0.5rem; height: 31.6px;">Activa</span>
+
                                 }
                             </td>
                         </tr>
