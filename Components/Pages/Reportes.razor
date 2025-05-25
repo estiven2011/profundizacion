@@ -1,0 +1,55 @@
+﻿@page "/reportes"
+@inject gestionReservas.Services.ReservaService ReservaService
+@inject IJSRuntime JS
+@using gestionReservas.Models
+
+<h3 class="text-primary">Reportes de Reservas - Hoy</h3>
+
+<div class="row my-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Reservas por Estado</h5>
+                <canvas id="graficoReservas" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int activas = 0;
+    private int canceladas = 0;
+    private int expiradas = 0;
+    private bool datosCargados = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var hoy = DateTime.Today;
+        var ahora = DateTime.Now.TimeOfDay;
+        var todas = await ReservaService.ObtenerReservasAsync();
+
+        var reservasDelDia = todas.Where(r => r.Fecha == hoy).ToList();
+
+        activas = reservasDelDia.Count(r =>
+            r.Estado?.Trim().ToLower() == "activa" &&
+            r.HoraFin > ahora);
+
+        canceladas = reservasDelDia.Count(r =>
+            r.Estado?.Trim().ToLower() == "cancelada");
+
+        expiradas = reservasDelDia.Count(r =>
+            r.Estado?.Trim().ToLower() == "activa" &&
+            r.HoraFin <= ahora);
+
+        datosCargados = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (datosCargados)
+        {
+            datosCargados = false; // evitar múltiples llamadas
+            await JS.InvokeVoidAsync("dibujarGraficoReservas", activas, canceladas, expiradas);
+        }
+    }
+}
