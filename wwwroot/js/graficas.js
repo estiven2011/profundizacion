@@ -1,50 +1,60 @@
-﻿window.dibujarGraficoReservas = (activas, canceladas, expiradas) => {
-    const ctx = document.getElementById('graficoReservas').getContext('2d');
+﻿window.dibujarGraficoReservasPorCancha = (labels, activas, canceladas, expiradas) => {
+    const ctx = document.getElementById('graficoReservasCancha').getContext('2d');
 
-    if (window.miGrafico) {
-        window.miGrafico.destroy();
+    // ✅ Verifica si el gráfico ya existe antes de destruirlo
+    if (window.graficoReservasCancha && typeof window.graficoReservasCancha.destroy === 'function') {
+        window.graficoReservasCancha.destroy();
     }
 
-    window.miGrafico = new Chart(ctx, {
+    window.graficoReservasCancha = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Activas', 'Canceladas', 'Expiradas'],
-            datasets: [{
-                label: 'Reservas de hoy',
-                data: [activas, canceladas, expiradas],
-                backgroundColor: [
-                    'rgba(25, 135, 84, 0.7)',
-                    'rgba(220, 53, 69, 0.7)',
-                    'rgba(108, 117, 125, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(25, 135, 84, 1)',
-                    'rgba(220, 53, 69, 1)',
-                    'rgba(108, 117, 125, 1)'
-                ],
-                borderWidth: 1
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Activas',
+                    data: activas,
+                    backgroundColor: '#4CAF50'
+                },
+                {
+                    label: 'Canceladas',
+                    data: canceladas,
+                    backgroundColor: '#F44336'
+                },
+                {
+                    label: 'Expiradas',
+                    data: expiradas,
+                    backgroundColor: '#9E9E9E'
+                }
+            ]
         },
         options: {
             responsive: true,
             scales: {
+                x: { stacked: true },
                 y: {
+                    stacked: true,
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
-                        precision: 0,
                         callback: function (value) {
                             return Number.isInteger(value) ? value : null;
-                        }
+                        },
+                        maxTicksLimit: 10
                     },
-                    suggestedMax: 10  // <--- clave: muestra hasta 15 a menos que haya más
+                    suggestedMax: 10
                 }
+
+            },
+            plugins: {
+                legend: { position: 'top' }
             }
-
-
         }
     });
 };
+
+
+
 
 window.dibujarGraficoCanchas = (labels, datos) => {
     const ctx = document.getElementById('graficoCanchas').getContext('2d');
@@ -83,18 +93,19 @@ window.dibujarGraficoCanchas = (labels, datos) => {
             responsive: true,
             layout: {
                 padding: {
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
                 }
             },
+
             plugins: {
                 legend: {
                     position: 'right'
                 }
             },
-            cutout: '60%'  
+            cutout: '70%'  
         }
 
 
