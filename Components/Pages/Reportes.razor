@@ -3,27 +3,30 @@
 @inject IJSRuntime JS
 @using gestionReservas.Models
 
-<h3 class="text-primary">Reportes de Reservas - Hoy</h3>
+<h3 class="text-primary">Reportes de Reservas</h3>
 
 <div class="row my-4">
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Reservas por cancha y estado (hoy)</h5>
-            <canvas id="graficoReservasCancha" style="height: 240px; width: 100%;"></canvas>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4 h-100">
+            <div class="card-body">
+                <h5 class="card-title">Reservas por cancha y estado (hoy)</h5>
+                <canvas id="graficoReservasCancha" style="height: 180px; width: 100%; max-width: 500px; margin: auto; display: block;"></canvas>
+
+            </div>
         </div>
     </div>
 
-
     <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm mb-4 h-100">
             <div class="card-body">
                 <h5 class="card-title">Canchas más reservadas (Histórico)</h5>
-                <canvas id="graficoCanchas" style="height: 130px; max-width: 100%; margin: auto; display: block;"></canvas>
+                <canvas id="graficoCanchas" style="height: 180px; width: 100%; max-width: 400px; margin: auto; display: block;"></canvas>
 
             </div>
         </div>
     </div>
 </div>
+
 
 
 
