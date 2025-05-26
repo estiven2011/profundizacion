@@ -12,12 +12,20 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
-				<li class="nav-item"><a class="nav-link" href="/login">Inicio de sesión</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login">Inicio de sesión</a></li>
                 <li class="nav-item"><a class="nav-link" href="/canchas">Canchas</a></li>
                 <li class="nav-item"><a class="nav-link" href="/reservas">Reservas</a></li>
                 <li class="nav-item"><a class="nav-link" href="/admin">Administración</a></li>
                 <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
+
+                @if (AuthService.EstaAutenticado && AuthService.Rol == "Admin")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reportes">Reportes</a>
+                    </li>
+                }
             </ul>
+
         </div>
     </div>
 </nav>
@@ -25,6 +33,10 @@
 <div class="container mt-4">
     @Body
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/graficas.js"></script>
+
 
 
 @code {

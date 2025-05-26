@@ -1,0 +1,94 @@
+﻿@page "/reportes"
+@inject gestionReservas.Services.ReservaService ReservaService
+@inject IJSRuntime JS
+@using gestionReservas.Models
+
+<h3 class="text-primary">Reportes de Reservas - Hoy</h3>
+
+<div class="row my-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Reservas por cancha y estado (hoy)</h5>
+            <canvas id="graficoReservasCancha" style="height: 240px; width: 100%;"></canvas>
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Canchas más reservadas (Histórico)</h5>
+                <canvas id="graficoCanchas" style="height: 130px; max-width: 100%; margin: auto; display: block;"></canvas>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private List<string> nombresCanchas = new();
+    private List<int> activasPorCancha = new();
+    private List<int> canceladasPorCancha = new();
+    private List<int> expiradasPorCancha = new();
+
+    private List<string> nombresCanchasHistorico = new();
+    private List<int> conteosCanchas = new();
+
+    private bool datosCargados = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var hoy = DateTime.Today;
+        var ahora = DateTime.Now.TimeOfDay;
+        var todas = await ReservaService.ObtenerReservasAsync();
+        var reservasHoy = todas.Where(r => r.Fecha == hoy).ToList();
+
+        var agrupadas = reservasHoy
+            .GroupBy(r => r.Cancha.Nombre)
+            .ToList();
+
+        nombresCanchas = agrupadas.Select(g => g.Key).ToList();
+        activasPorCancha = agrupadas.Select(g =>
+            g.Count(r => r.Estado?.Trim().ToLower() == "activa" && r.HoraFin > ahora)).ToList();
+        canceladasPorCancha = agrupadas.Select(g =>
+            g.Count(r => r.Estado?.Trim().ToLower() == "cancelada")).ToList();
+        expiradasPorCancha = agrupadas.Select(g =>
+            g.Count(r => r.Estado?.Trim().ToLower() == "activa" && r.HoraFin <= ahora)).ToList();
+
+        // Canchas más reservadas históricamente
+        var reservasPorCancha = todas
+            .GroupBy(r => r.Cancha.Nombre)
+            .Select(g => new
+            {
+                Nombre = g.Key,
+                Cantidad = g.Count()
+            })
+            .OrderByDescending(g => g.Cantidad)
+            .ToList();
+
+        nombresCanchasHistorico = reservasPorCancha.Select(x => x.Nombre).ToList();
+        conteosCanchas = reservasPorCancha.Select(x => x.Cantidad).ToList();
+
+        datosCargados = true;
+
+        Console.WriteLine("Canchas hoy: " + string.Join(", ", nombresCanchas));
+        Console.WriteLine("Activas: " + string.Join(", ", activasPorCancha));
+
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (datosCargados)
+        {
+            datosCargados = false;
+
+            await JS.InvokeVoidAsync("dibujarGraficoReservasPorCancha", nombresCanchas, activasPorCancha, canceladasPorCancha, expiradasPorCancha);
+            await JS.InvokeVoidAsync("dibujarGraficoCanchas", nombresCanchasHistorico, conteosCanchas);
+        }
+    }
+
+}
