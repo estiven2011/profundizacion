@@ -31,6 +31,8 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 // Middleware
 if (!app.Environment.IsDevelopment())
 {
