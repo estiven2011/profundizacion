@@ -23,12 +23,15 @@ builder.Services.AddScoped<gestionReservas.Services.UserService>();
 builder.Services.AddScoped<gestionReservas.Services.AuthService>();
 builder.Services.AddScoped<CanchaService>();
 builder.Services.AddScoped<ReservaService>();
+builder.Services.AddControllers();
 
 
 
 
 
 var app = builder.Build();
+
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // Middleware
 if (!app.Environment.IsDevelopment())
@@ -39,7 +42,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAntiforgery();
-
+app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
