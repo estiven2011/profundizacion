@@ -24,6 +24,7 @@ builder.Services.AddScoped<gestionReservas.Services.AuthService>();
 builder.Services.AddScoped<CanchaService>();
 builder.Services.AddScoped<ReservaService>();
 builder.Services.AddControllers();
+builder.Services.AddScoped<EmailService>();
 
 
 
