@@ -18,11 +18,13 @@
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre completo</label>
                             <InputText id="nombre" class="form-control" @bind-Value="nuevoUsuario.Nombre" />
+                            <ValidationMessage For="@(() => nuevoUsuario.Nombre)" />
                         </div>
 
                         <div class="mb-3">
                             <label for="documento" class="form-label">Documento</label>
                             <InputText id="documento" class="form-control" @bind-Value="nuevoUsuario.Documento" />
+                            <ValidationMessage For="@(() => nuevoUsuario.Documento)" />
                         </div>
 
                         <div class="mb-3">
@@ -32,12 +34,19 @@
                                        @bind-Value="nuevoUsuario.FechaNacimiento"
                                        min="1950-01-01"
                                        max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <ValidationMessage For="@(() => nuevoUsuario.FechaNacimiento)" />
+                        </div>
 
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <InputText id="correo" class="form-control" @bind-Value="nuevoUsuario.Correo" />
+                            <ValidationMessage For="@(() => nuevoUsuario.Correo)" />
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
                             <InputText id="password" type="password" class="form-control" @bind-Value="nuevoUsuario.Contraseña" />
+                            <ValidationMessage For="@(() => nuevoUsuario.Contraseña)" />
                         </div>
 
                         <div class="mb-3">
@@ -84,11 +93,9 @@
             return;
         }
 
-        // ✅ ESTA ES LA LÍNEA NUEVA QUE TE FALTABA
         nuevoUsuario.Rol = "Cliente";
 
         await UserService.CrearUsuarioAsync(nuevoUsuario);
         Navigation.NavigateTo("/login");
     }
-
 }
