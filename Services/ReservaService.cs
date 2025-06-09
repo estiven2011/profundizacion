@@ -7,10 +7,12 @@ namespace gestionReservas.Services
     public class ReservaService
     {
         private readonly ApplicationDbContext _context;
+        private readonly EmailService _emailService; // 👈 Agregado
 
-        public ReservaService(ApplicationDbContext context)
+        public ReservaService(ApplicationDbContext context, EmailService emailService) // 👈 Agregado en constructor
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<List<Reserva>> ObtenerReservasAsync()
@@ -23,9 +25,26 @@ namespace gestionReservas.Services
 
         public async Task CrearReservaAsync(Reserva reserva)
         {
-            reserva.Estado = "Activa"; // 🟢 Nuevo: todas las reservas nuevas son activas
+            reserva.Estado = "Activa";
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
+
+            // 👇 Enviar correo después de guardar la reserva
+            var usuario = await _context.Usuarios.FindAsync(reserva.UsuarioId);
+            await _context.Entry(reserva).Reference(r => r.Cancha).LoadAsync();
+
+            if (!string.IsNullOrWhiteSpace(usuario?.Correo))
+            {
+                string asunto = "Confirmación de reserva de cancha";
+                string cuerpo = $"Hola {usuario.Nombre},\n\n" +
+                                $"Tu reserva fue confirmada con éxito:\n\n" +
+                                $"- Fecha: {reserva.Fecha:dddd, dd MMMM yyyy}\n" +
+                                $"- Hora: {reserva.HoraInicio} a {reserva.HoraFin}\n" +
+                                $"- Cancha: {reserva.Cancha?.Nombre ?? "N/A"}\n\n" +
+                                $"Gracias por usar nuestro sistema de reservas.";
+
+                await _emailService.EnviarCorreoAsync(usuario.Correo, asunto, cuerpo);
+            }
         }
 
         public async Task EditarReservaAsync(Reserva reservaActualizada)
@@ -67,7 +86,6 @@ namespace gestionReservas.Services
             await _context.SaveChangesAsync();
         }
 
-        // ✅ NUEVO: Método para obtener historial de reservas por documento
         public async Task<List<Reserva>> ObtenerReservasPorDocumentoAsync(string documento)
         {
             return await _context.Reservas
@@ -77,13 +95,11 @@ namespace gestionReservas.Services
                 .ToListAsync();
         }
 
-        //NUEVO
         public async Task<List<Reserva>> ObtenerReservasPorCanchaYFecha(int canchaId, DateTime fecha)
         {
             return await _context.Reservas
                 .Where(r => r.CanchaId == canchaId && r.Fecha == fecha && r.Estado == "Activa")
                 .ToListAsync();
         }
-
     }
 }
