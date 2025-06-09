@@ -7,9 +7,9 @@ namespace gestionReservas.Services
     public class ReservaService
     {
         private readonly ApplicationDbContext _context;
-        private readonly EmailService _emailService; // 👈 Agregado
+        private readonly EmailService _emailService;
 
-        public ReservaService(ApplicationDbContext context, EmailService emailService) // 👈 Agregado en constructor
+        public ReservaService(ApplicationDbContext context, EmailService emailService)
         {
             _context = context;
             _emailService = emailService;
@@ -29,7 +29,7 @@ namespace gestionReservas.Services
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
 
-            // 👇 Enviar correo después de guardar la reserva
+            // Enviar correo al crear
             var usuario = await _context.Usuarios.FindAsync(reserva.UsuarioId);
             await _context.Entry(reserva).Reference(r => r.Cancha).LoadAsync();
 
@@ -49,7 +49,11 @@ namespace gestionReservas.Services
 
         public async Task EditarReservaAsync(Reserva reservaActualizada)
         {
-            var reservaExistente = await _context.Reservas.FindAsync(reservaActualizada.Id);
+            var reservaExistente = await _context.Reservas
+                .Include(r => r.Usuario)
+                .Include(r => r.Cancha)
+                .FirstOrDefaultAsync(r => r.Id == reservaActualizada.Id);
+
             if (reservaExistente is null) return;
 
             reservaExistente.Fecha = reservaActualizada.Fecha;
@@ -59,6 +63,20 @@ namespace gestionReservas.Services
             reservaExistente.Estado = reservaActualizada.Estado;
 
             await _context.SaveChangesAsync();
+
+            // Enviar correo al editar
+            if (!string.IsNullOrWhiteSpace(reservaExistente.Usuario?.Correo))
+            {
+                string asunto = "Actualización de reserva de cancha";
+                string cuerpo = $"Hola {reservaExistente.Usuario.Nombre},\n\n" +
+                                $"Tu reserva ha sido actualizada con éxito:\n\n" +
+                                $"- Fecha: {reservaExistente.Fecha:dddd, dd MMMM yyyy}\n" +
+                                $"- Hora: {reservaExistente.HoraInicio} a {reservaExistente.HoraFin}\n" +
+                                $"- Cancha: {reservaExistente.Cancha?.Nombre ?? "N/A"}\n\n" +
+                                $"Gracias por confiar en nosotros.";
+
+                await _emailService.EnviarCorreoAsync(reservaExistente.Usuario.Correo, asunto, cuerpo);
+            }
         }
 
         public async Task EliminarReservaAsync(Reserva reserva)

@@ -6,7 +6,6 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-
 <NavMenu />
 
 @if (!AuthService.EstaAutenticado)
@@ -151,7 +150,6 @@ else
                                 @if (reserva.Estado == "Activa" && reserva.Fecha >= DateTime.Today)
                                 {
                                     <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmarCancelacion(reserva.Id)">Cancelar</button>
-
                                 }
                             </div>
                         </div>
@@ -163,8 +161,8 @@ else
 }
 
 @code {
-    private List<Reserva> reservas = new(); // solo las del usuario actual
-    private List<Reserva> todasLasReservas = new(); // todas las reservas activas
+    private List<Reserva> reservas = new();
+    private List<Reserva> todasLasReservas = new();
     private List<Cancha> canchas = new();
     private Reserva nuevaReserva = new() { Fecha = DateTime.Today };
 
@@ -189,7 +187,6 @@ else
     private bool mostrarAlerta;
     private bool tieneReservasHoy = false;
 
-
     protected override async Task OnInitializedAsync()
     {
         await CargarDatos();
@@ -204,7 +201,6 @@ else
             .Where(r => r.Usuario.Documento == AuthService.Documento)
             .ToList();
 
-        // ✅ Verificar si hay reservas activas para hoy
         tieneReservasHoy = reservas.Any(r =>
             r.Estado == "Activa" &&
             r.Fecha.Date == DateTime.Today);
@@ -212,7 +208,6 @@ else
         GenerarHoras();
         CalcularHorasOcupadas();
     }
-
 
     private void GenerarHoras()
     {
@@ -269,6 +264,8 @@ else
 
     private async Task GuardarReserva()
     {
+        mostrarAlerta = false;
+
         if (TimeSpan.Parse(horaInicio) >= TimeSpan.Parse(horaFin)) return;
 
         var usuario = await UserService.ObtenerIdPorDocumentoAsync(AuthService.Documento);
@@ -278,7 +275,6 @@ else
         nuevaReserva.HoraInicio = TimeSpan.Parse(horaInicio);
         nuevaReserva.HoraFin = TimeSpan.Parse(horaFin);
 
-        // ✅ CONSULTAMOS TODAS LAS RESERVAS MÁS ACTUALES
         var todas = await ReservaService.ObtenerReservasAsync();
 
         var solapadas = todas.Any(r =>
@@ -287,9 +283,9 @@ else
             r.Fecha.Date == nuevaReserva.Fecha.Date &&
             r.Estado == "Activa" &&
             (
-                (nuevaReserva.HoraInicio >= r.HoraInicio && nuevaReserva.HoraInicio < r.HoraFin) || // inicia dentro
-                (nuevaReserva.HoraFin > r.HoraInicio && nuevaReserva.HoraFin <= r.HoraFin) ||       // termina dentro
-                (nuevaReserva.HoraInicio <= r.HoraInicio && nuevaReserva.HoraFin >= r.HoraFin)      // cubre totalmente otra
+                (nuevaReserva.HoraInicio >= r.HoraInicio && nuevaReserva.HoraInicio < r.HoraFin) ||
+                (nuevaReserva.HoraFin > r.HoraInicio && nuevaReserva.HoraFin <= r.HoraFin) ||
+                (nuevaReserva.HoraInicio <= r.HoraInicio && nuevaReserva.HoraFin >= r.HoraFin)
             )
         );
 
@@ -310,26 +306,29 @@ else
             await MostrarAlerta("Reserva actualizada correctamente", "info");
         }
 
-        nuevaReserva = new() { Fecha = DateTime.Today };
-        horaInicio = null;
-        horaFin = null;
-
+        ResetearFormulario();
         await CargarDatos();
     }
 
+    private void ResetearFormulario()
+    {
+        nuevaReserva = new Reserva { Fecha = DateTime.Today };
+        horaInicio = null;
+        horaFin = null;
+    }
 
     private void EditarReserva(Reserva reserva)
     {
         if (reserva.Estado != "Activa") return;
 
         nuevaReserva = new Reserva
-            {
-                Id = reserva.Id,
-                Fecha = reserva.Fecha,
-                CanchaId = reserva.CanchaId,
-                UsuarioId = reserva.UsuarioId,
-                Estado = reserva.Estado
-            };
+        {
+            Id = reserva.Id,
+            Fecha = reserva.Fecha,
+            CanchaId = reserva.CanchaId,
+            UsuarioId = reserva.UsuarioId,
+            Estado = reserva.Estado
+        };
         horaInicio = reserva.HoraInicio.ToString(@"hh\:mm");
         horaFin = reserva.HoraFin.ToString(@"hh\:mm");
         CalcularHorasOcupadas();
@@ -363,6 +362,4 @@ else
             await CancelarReserva(reservaId);
         }
     }
-
 }
-
