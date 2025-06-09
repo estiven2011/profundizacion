@@ -55,3 +55,41 @@
     padding: 60px 0;
     color: white;
 }
+
+.btn-all {
+    border: none;
+    padding: 10px 20px;
+    font-weight: 400;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    margin: 30px 40px;
+}
+
+#btnexc {
+    background-color: #28a745;
+}
+
+    #btnexc:hover {
+        background-color: #218838;
+    }
+
+/* Rojo bonito tipo PDF */
+#btnpdf {
+    background-color: #dc3545;
+}
+
+    #btnpdf:hover {
+        background-color: #c82333;
+    }
+
+/* Azul tipo Word */
+#btnwrd {
+    background-color: #007bff;
+}
+
+    #btnwrd:hover {
+        background-color: #0069d9;
+    }

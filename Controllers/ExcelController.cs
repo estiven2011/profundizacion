@@ -7,16 +7,16 @@ namespace gestionReservas.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ExportController : ControllerBase
+    public class ExcelController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ExportController(ApplicationDbContext context)
+        public ExcelController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet("reporte-mensual")]
+        [HttpGet("reporte-semanalEXC")]
         public async Task<IActionResult> GenerarExcelMensual()
         {
             var hoy = DateTime.Today;
@@ -45,7 +45,7 @@ namespace gestionReservas.Controllers
             hoja.Cell(1, 1).Value = "Cancha";
             hoja.Cell(1, 2).Value = "Total de Reservas";
             hoja.Cell(1, 3).Value = "Total de Horas";
-            hoja.Cell(1, 4).Value = "Ingreso Estimado ($)";
+            hoja.Cell(1, 4).Value = "Ingresos ($)";
 
             for (int i = 0; i < resumen.Count; i++)
             {

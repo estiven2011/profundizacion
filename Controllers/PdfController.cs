@@ -19,7 +19,7 @@ namespace gestionReservas.Controllers
             _context = context;
         }
 
-        [HttpGet("reporte-semanal")]
+        [HttpGet("reporte-semanalPDF")]
         public async Task<IActionResult> GenerarReporteSemanal()
         {
             var hoy = DateTime.Today;
